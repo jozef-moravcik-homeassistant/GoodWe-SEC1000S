@@ -1,6 +1,8 @@
 # GoodWe-SEC1000S
 Home Assistant Integration for GoodWe Smart Energy Controller SEC1000/S
 
+## The integration is installed on three systems and running for 8 months. Currently I'm preparing new final version which will be available on HACS until the end of January 2026 
+
 The integration SEC1000/S provides a set of methods that can be used to set conditions and limits for control of power export to the grid, synchronize time in the device, and read telemetry data that the device provides. The goal of the project is to automate the export of power to the grid, transfer telemetry data from SEMS Portal to Home Assistant, which allows to see the data immediately, and for cybersecurity reasons, cut off the device from the Internet and control it exclusively through its own environment, in which sensitive telemetry data is stored and processed.
 
 ## Introduction
