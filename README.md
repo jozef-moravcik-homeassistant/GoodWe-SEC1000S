@@ -1,4 +1,4 @@
-# GoodWe-SEC1000S
+# GoodWe SEC1000S (Smart Energy Controller)
 Home Assistant Integration for GoodWe Smart Energy Controller SEC1000/S
 
 ## The integration is installed on three systems and running for 8 months. Currently I'm preparing new final version which will be available on HACS until the end of January 2026 
