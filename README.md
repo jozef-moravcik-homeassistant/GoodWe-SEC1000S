@@ -53,51 +53,60 @@ The value sent to the device is taken from configuration, from Minimum export li
 Like the previous service , also the service export_enable was created for easy control of the export limit. The value sent to the device is taken from configuration, from Maximum export limit value. This service sends also two parameters, Export Limit Control Mode and Sum measurement of all three phases described in the section 1.2
 
 ##### An example how to call the method by a simple button:
- - type: button
- show_name: true
- show_icon: true
- name: Export ON
- icon: mdi:transmission-tower-export
- tap_action:
- action: call-service
- service: goodwe_sec1000.export_enable
+
+```yaml
+- type: button
+  show_name: true
+  show_icon: true
+  name: Export ON
+  icon: mdi:transmission-tower-export
+  tap_action:
+    action: call-service
+    service: goodwe_sec1000.export_enable
+```
 
 ##### An example 1, how to call the method with value 7kW by a simple button:
- - type: button
- show_name: true
- show_icon: true
- name: 7.0 kW
- icon: mdi:transmission-tower-off
- tap_action:
- action: call-service
- service: goodwe_sec1000.set_export_limit
- service_data:
- limit: 7
- grid_options:
- columns: 3
- rows: 2
- icon_height: 50px
+
+```yaml
+- type: button
+  show_name: true
+  show_icon: true
+  name: 7.0 kW
+  icon: mdi:transmission-tower-off
+  tap_action:
+  action: call-service
+  service: goodwe_sec1000.set_export_limit
+  service_data:
+  limit: 7
+  grid_options:
+  columns: 3
+  rows: 2
+  icon_height: 50px
+```
 
 ##### An example 2, how to call the method by a slider:
+
+```yaml
 - type: vertical-stack
- cards:
- - type: entities
- entities:
- - entity: sensor.sec1000_export_limit
- name: Current Export Limit
- - entity: input_number.export_limit
- icon: mdi:transmission-tower-export
- name: Export Limit
- tap_action:
- action: call-service
- service: script.set_export_limit
- data: {}
- footer:
- type: buttons
- entities:
- - entity: script.set_export_limit
- icon: mdi:check
- name: Appl
+  cards:
+  - type: entities
+    entities:
+      - entity: sensor.sec1000_export_limit
+        name: Current Export Limit
+      - entity: input_number.export_limit
+        icon: mdi:transmission-tower-export
+        name: Export Limit
+        tap_action:
+          action: call-service
+          service: script.set_export_limit
+          data: {}
+        footer:
+          type: buttons
+          entities:
+            - entity: script.set_export_limit
+              icon: mdi:check
+              name: Apply
+```
 
 #### Get export limit (get_export_limit)
 This service reads the current Export Limit to a sensor and reads Control Mode Values from the device and updates the integration settings.
