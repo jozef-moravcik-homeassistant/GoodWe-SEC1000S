@@ -37,14 +37,14 @@ power is measured as a sum on all three phases, or each phase is measured separa
 As mentioned in section 1.2, this method was created for easy control of the export limit, whether in automations or elements such as buttons, etc.
 The value sent to the device is taken from configuration, from Minimum export limit value which is ussualy 0. Although this value is usually zero, it is configurable because in some special cases it is required to set it to a different, small value, close to zero but not zero. This service sends also two parameters, Export Limit Control Mode and Sum measurement of all three phases described in the section 1.2
 #### An example how to call the method by a simple button:
-   - type: button
-   show_name: true
-   show_icon: true
-   name: Export OFF
-   icon: mdi:transmission-tower-off
-   tap_action:
-   action: call-service
-   service: goodwe_sec1000.export_disable
+-   - type: button
+      show_name: true
+      show_icon: true
+      name: Export OFF
+      icon: mdi:transmission-tower-off
+      tap_action:
+      action: call-service
+      service: goodwe_sec1000.export_disable
 
 #### Export Enable (export_enable)
 Like the previous service , also the service export_enable was created for easy control of the export limit. The value sent to the device is taken from configuration, from Maximum export limit value. This service sends also two parameters, Export Limit Control Mode and Sum measurement of all three phases described in the section 1.2
