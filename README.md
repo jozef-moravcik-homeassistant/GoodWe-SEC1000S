@@ -29,7 +29,7 @@ The **GoodWe SEC1000/S Integration** provides comprehensive control and monitori
 
 - ⚡ **Control power export** to the grid with configurable limits
 - 📊 **Monitor real-time telemetry data** from your solar system
-- 🔒 **Enhance cybersecurity** by operating SEC1000 offline from SEMS Portal via Home Assistant
+- 🔒 **Enhance cybersecurity** by operating SEC1000 offline from SEMS Portal via Home Assistant only.
 - ⏰ **Synchronize device time** with Home Assistant
 - 🔄 **Automate energy management** using Home Assistant automations
 
@@ -51,7 +51,7 @@ For detailed information about the GoodWe SEC1000/S device, please refer to:
 
 ### ⚠️ Disclaimer
 
-**The use of this integration is at your own risk.** Any potential damage caused by the integration is the responsibility of the user. The current version is tested and stable, running on multiple production systems for over 8 months.
+**The use of this integration is at your own risk.** Any potential damage caused by the integration is the responsibility of the user. The current version is tested and stable, running on multiple production systems from May 2025.
 
 ---
 
@@ -88,7 +88,7 @@ For detailed information about the GoodWe SEC1000/S device, please refer to:
 3. Search for **GoodWe SEC1000/S**
 4. Follow the configuration steps (see [Configuration](#-configuration) section)
 
-⏳ **Important:** After saving the configuration, the integration needs approximately **30 seconds** to synchronize with the device. During this time:
+⏳ **Important:** After installation and first saving the configuration, the integration needs approximately **30 seconds** to synchronize with the device. During this time:
 - Control entities will become available
 - All sensors will load with correct values
 - The device will be fully initialized
