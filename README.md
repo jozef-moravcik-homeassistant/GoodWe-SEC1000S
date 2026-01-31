@@ -189,7 +189,9 @@ You can modify the configuration at any time:
 ## 📊 Sensors
 
 The integration provides comprehensive telemetry data through multiple sensors.
-if you use as device identification a serial number (e.i. E04M80), All Entity IDs will use a prefix **sensor.sec1000_e04m80_**
+EXAMPLE:
+- if you use as device identification a serial number (e.i. E04M80), All Entity IDs will use a prefix **sensor.sec1000_e04m80_**
+- if you use as device identification a serial number (e.i. Device1), All Entity IDs will use a prefix **sensor.sec1000_device1_**
 ### Voltage Sensors (Phase 1, 2, 3)
 
 - **Entity IDs**: `sensor.sec1000_e04m80_v1`, `sensor.sec1000_e04m80_v2`, `sensor.sec1000_e04m80_v3`
