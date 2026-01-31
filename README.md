@@ -352,13 +352,13 @@ Sets a custom export power limit value.
 **Parameters**:
 - `limit` (float, required): Export limit in kW (0.00 - 100.00)
 
-**Example: Button with Specific Limit (7 kW)**
+**Example: Button with Specific Limit (9.9 kW)**
 
 ```yaml
 type: button
 show_name: true
 show_icon: true
-name: 7.0 kW
+name: 9.9 kW
 icon: mdi:transmission-tower
 tap_action:
   action: call-service
@@ -371,10 +371,9 @@ grid_options:
   icon_height: 50px
 ```
 
-**Example: Slider Control**
-
 ![Example UI Control Buttons 1](docs/images/example_ui_control_buttons_1.jpg)
 
+**Example: Slider Control**
 ```yaml
 type: vertical-stack
 cards:
