@@ -40,7 +40,7 @@ The **GoodWe SEC1000/S Integration** provides comprehensive control and monitori
 - **Automatic data refresh** with configurable intervals
 - **Multiple device support** - connect several SEC1000 devices simultaneously
 - **Comprehensive feedback system** for monitoring communication status
-- **Multi-language support** (English, Slovak)
+- **Multi-language support** (English, Slovak, Czech, Polish, German, Romanian)
 
 ### 📚 Official Documentation
 
