@@ -1,7 +1,6 @@
 {
   "name": "GoodWe SEC1000/S",
   "render_readme": true,
-  "domains": ["sensor", "button", "switch"],
   "iot_class": "Local Polling",
   "homeassistant": "2024.1.0"
 }
