@@ -189,22 +189,22 @@ You can modify the configuration at any time:
 ## 📊 Sensors
 
 The integration provides comprehensive telemetry data through multiple sensors.
-
+if you use as device identification a serial number (e.i. E04M80), All Entity IDs will use a prefix **sensor.sec1000_e04m80_**
 ### Voltage Sensors (Phase 1, 2, 3)
 
-- **Entity IDs**: `sensor.sec1000_v1`, `sensor.sec1000_v2`, `sensor.sec1000_v3`
+- **Entity IDs**: `sensor.sec1000_e04m80_v1`, `sensor.sec1000_e04m80_v2`, `sensor.sec1000_e04m80_v3`
 - **Unit**: V (Volts)
 - **Description**: Phase voltage measurements
 
 ### Current Sensors (Phase 1, 2, 3)
 
-- **Entity IDs**: `sensor.sec1000_i1`, `sensor.sec1000_i2`, `sensor.sec1000_i3`
+- **Entity IDs**: `sensor.sec1000_e04m80_i1`, `sensor.sec1000_e04m80_i2`, `sensor.sec1000_e04m80_i3`
 - **Unit**: A (Amperes)
 - **Description**: Phase current measurements
 
 ### Power Sensors (Phase 1, 2, 3)
 
-- **Entity IDs**: `sensor.sec1000_p1`, `sensor.sec1000_p2`, `sensor.sec1000_p3`
+- **Entity IDs**: `sensor.sec1000_e04m80_p1`, `sensor.sec1000_e04m80_p2`, `sensor.sec1000_e04m80_p3`
 - **Unit**: W (Watts)
 - **Description**: Phase power measurements
 
@@ -212,17 +212,17 @@ The integration provides comprehensive telemetry data through multiple sensors.
 
 | Sensor | Entity ID | Unit | Description |
 |--------|-----------|------|-------------|
-| **Meter Power** | `sensor.sec1000_meters_power` | W | Power measured at the utility meter |
-| **Inverter Power** | `sensor.sec1000_inverters_power` | W | Total power from all inverters |
-| **Load Power** | `sensor.sec1000_load_power` | W | Power consumption (appliances + battery) |
+| **Meter Power** | `sensor.sec1000_e04m80_meters_power` | W | Power measured at the utility meter |
+| **Inverter Power** | `sensor.sec1000_e04m80_inverters_power` | W | Total power from all inverters |
+| **Load Power** | `sensor.sec1000_e04m80_load_power` | W | Power consumption (appliances + battery) |
 
 ### Control Status Sensors
 
 | Sensor | Entity ID | Description |
 |--------|-----------|-------------|
-| **Export Limit** | `sensor.sec1000_export_limit` | Current export power limit (kW) |
-| **Export State** | `sensor.sec1000_export_state` | Export status: ON (enabled) / OFF (disabled) |
-| **Module Started** | `sensor.sec1000_modul_started` | Integration initialization status |
+| **Export Limit** | `sensor.sec1000_e04m80_export_limit` | Current export power limit (kW) |
+| **Export State** | `sensor.sec1000_e04m80_export_state` | Export status: ON (enabled) / OFF (disabled) |
+| **Module Started** | `sensor.sec1000_e04m80_modul_started` | Integration initialization status |
 
 ### Device Name Prefix in Entity Names
 
@@ -233,17 +233,16 @@ The integration allows you to display the device name as a prefix in entity name
 ![Entities with Device Name Prefix](docs/images/entities_with_device_name_prefix.jpg)
 
 When **"Include device name in entity"** is **enabled** in configuration:
-- Entity names include device name: `sensor.sec1000_device_1_v1`
+- Entity names include device unique identificator (e.i. serial number or unique device name such as Device1, etc.): `sensor.sec1000_e04m80_v1`
 - Useful for distinguishing entities from multiple devices
-- Recommended when using 2+ SEC1000 devices
+- Required when using more SEC1000 devices
 
 #### ❌ Without Device Name Prefix (Disabled)
 
 ![Entities without Prefix](docs/images/entities_without_prefix.jpg)
 
 When **"Include device name in entity"** is **disabled** in configuration:
-- Entity names are shorter: `sensor.sec1000_v1`
-- Cleaner appearance in UI
+- Entity names are shorter
 - Recommended for single device installations
 
 ---
@@ -378,7 +377,7 @@ type: vertical-stack
 cards:
   - type: entities
     entities:
-      - entity: sensor.sec1000_export_limit
+      - entity: sensor.sec1000_e04m80_export_limit
         name: Current Export Limit
       - entity: input_number.export_limit
         icon: mdi:transmission-tower-export
@@ -549,13 +548,13 @@ The integration provides comprehensive feedback sensors that monitor the communi
 
 | Sensor | Entity ID | Description |
 |--------|-----------|-------------|
-| **Export Disable Feedback** | `sensor.sec1000_export_disable_feedback` | Status of export disable command |
-| **Export Enable Feedback** | `sensor.sec1000_export_enable_feedback` | Status of export enable command |
-| **Set Export Limit Feedback** | `sensor.sec1000_set_export_limit_feedback` | Status of set export limit command |
-| **Get Export Limit Feedback** | `sensor.sec1000_get_export_limit_feedback` | Status of get export limit command |
-| **Get Telemetry Data Feedback** | `sensor.sec1000_get_telemetry_data_feedback` | Status of telemetry data retrieval |
-| **Reset Export Watchdog Feedback** | `sensor.sec1000_reset_export_watchdog_feedback` | Status of watchdog reset command |
-| **Set Date Time Feedback** | `sensor.sec1000_set_datetime_feedback` | Status of time synchronization |
+| **Export Disable Feedback** | `sensor.sec1000_e04m80_export_disable_feedback` | Status of export disable command |
+| **Export Enable Feedback** | `sensor.sec1000_e04m80_export_enable_feedback` | Status of export enable command |
+| **Set Export Limit Feedback** | `sensor.sec1000_e04m80_set_export_limit_feedback` | Status of set export limit command |
+| **Get Export Limit Feedback** | `sensor.sec1000_e04m80_get_export_limit_feedback` | Status of get export limit command |
+| **Get Telemetry Data Feedback** | `sensor.sec1000_e04m80_get_telemetry_data_feedback` | Status of telemetry data retrieval |
+| **Reset Export Watchdog Feedback** | `sensor.sec1000_e04m80_reset_export_watchdog_feedback` | Status of watchdog reset command |
+| **Set Date Time Feedback** | `sensor.sec1000_set_e04m80_datetime_feedback` | Status of time synchronization |
 
 ### Feedback Value Structure
 
@@ -627,13 +626,13 @@ tap_action:
   action: call-service
   service: goodwe_sec1000.export_enable
 state:
-  - value: "{{ states('sensor.sec1000_export_enable_feedback') == '0' }}"
+  - value: "{{ states('sensor.sec1000_e04m80_export_enable_feedback') == '0' }}"
     color: orange
     icon: mdi:progress-upload
-  - value: "{{ states('sensor.sec1000_export_enable_feedback') == '1' }}"
+  - value: "{{ states('sensor.sec1000_e04m80_export_enable_feedback') == '1' }}"
     color: green
     icon: mdi:check-circle
-  - value: "{{ states('sensor.sec1000_export_enable_feedback') | int > 1 }}"
+  - value: "{{ states('sensor.sec1000_e04m80_export_enable_feedback') | int > 1 }}"
     color: red
     icon: mdi:alert-circle
 ```
@@ -646,13 +645,13 @@ automation:
     trigger:
       - platform: template
         value_template: >
-          {{ states('sensor.sec1000_get_telemetry_data_feedback') | int > 1 }}
+          {{ states('sensor.sec1000_e04m80_get_telemetry_data_feedback') | int > 1 }}
     action:
       - service: notify.mobile_app
         data:
           title: "SEC1000 Communication Error"
           message: >
-            Error code: {{ states('sensor.sec1000_get_telemetry_data_feedback') }}
+            Error code: {{ states('sensor.sec1000_e04m80_get_telemetry_data_feedback') }}
             Please check device connection.
 ```
 
