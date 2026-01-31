@@ -29,7 +29,7 @@ The **GoodWe SEC1000/S Integration** provides comprehensive control and monitori
 
 - ⚡ **Control power export** to the grid with configurable limits
 - 📊 **Monitor real-time telemetry data** from your solar system
-- 🔒 **Enhance cybersecurity** by operating SEC1000 offline from SEMS Portal
+- 🔒 **Enhance cybersecurity** by operating SEC1000 offline from SEMS Portal via Home Assistant
 - ⏰ **Synchronize device time** with Home Assistant
 - 🔄 **Automate energy management** using Home Assistant automations
 
