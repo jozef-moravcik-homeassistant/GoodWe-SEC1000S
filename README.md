@@ -371,7 +371,6 @@ grid_options:
   icon_height: 50px
 ```
 
-![Example UI Control Buttons 1](docs/images/example_ui_control_buttons_1.jpg)
 
 **Example: Slider Control**
 ```yaml
@@ -616,6 +615,8 @@ Command succeeded, but input parameter was corrected to stay within configured l
 ### Using Feedback Sensors in Automations
 
 **Example: Visual Feedback for Button Press**
+
+![Example UI Control Buttons 1](docs/images/example_ui_control_buttons_1.jpg)
 
 ```yaml
 type: custom:button-card
