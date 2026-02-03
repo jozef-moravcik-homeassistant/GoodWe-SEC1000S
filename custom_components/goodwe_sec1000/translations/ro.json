@@ -81,35 +81,87 @@
   "services": {
     "system_started": {
       "name": "Sistem pornit",
-      "description": "Sistem pornit"
+      "description": "Sistem pornit",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "set_export_limit": {
       "name": "Setează limita de export",
-      "description": "Setează valoarea limită de export pentru Goodwe SEC1000. Valoarea va fi ajustată automat pentru a rămâne în limitele minime și maxime configurate."
+      "description": "Setează valoarea limită de export pentru Goodwe SEC1000. Valoarea va fi ajustată automat pentru a rămâne în limitele minime și maxime configurate.",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        },
+        "limit": {
+          "name": "Limită",
+          "description": "Valoarea limitei de export în kW"
+        }
+      }
     },
     "get_export_limit": {
       "name": "Citește limita de export",
-      "description": "Citește valoarea curentă a limitei de export și modul de control de la dispozitivul Goodwe SEC1000 și actualizează setările integrării."
+      "description": "Citește valoarea curentă a limitei de export și modul de control de la dispozitivul Goodwe SEC1000 și actualizează setările integrării.",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "export_enable": {
       "name": "Activează exportul",
-      "description": "Această funcție setează limita pentru exportul de energie în rețea la valoarea MAXIMĂ de export definită în setările integrării."
+      "description": "Această funcție setează limita pentru exportul de energie în rețea la valoarea MAXIMĂ de export definită în setările integrării.",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "export_disable": {
       "name": "Dezactivează exportul",
-      "description": "Această funcție setează limita pentru exportul de energie în rețea la valoarea MINIMĂ de export definită în setările integrării (implicit = 0)."
+      "description": "Această funcție setează limita pentru exportul de energie în rețea la valoarea MINIMĂ de export definită în setările integrării (implicit = 0).",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "export_toggle": {
       "name": "Comutator Export",
-      "description": "Această funcție comută starea exportului. Dacă exportul este momentan activat, va fi dezactivat (setat la limita minimă de export). Dacă exportul este momentan dezactivat, va fi activat (setat la limita maximă de export)."
+      "description": "Această funcție comută starea exportului. Dacă exportul este momentan activat, va fi dezactivat (setat la limita minimă de export). Dacă exportul este momentan dezactivat, va fi activat (setat la limita maximă de export).",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "set_datetime": {
       "name": "Setează data și ora",
-      "description": "Această funcție setează data și ora pe dispozitiv."
+      "description": "Această funcție setează data și ora pe dispozitiv.",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     },
     "reset_export_watchdog": {
       "name": "Resetare Watchdog Export",
-      "description": "Această funcție \"resetează\" watchdog-ul din dispozitiv, care controlează limita de export pe invertoare. Uneori watchdog-ul se blochează, astfel că acest serviciu dezactivează și activează limita de export, resetând watchdog-ul de export pe invertoare."
+      "description": "Această funcție \"resetează\" watchdog-ul din dispozitiv, care controlează limita de export pe invertoare. Uneori watchdog-ul se blochează, astfel că acest serviciu dezactivează și activează limita de export, resetând watchdog-ul de export pe invertoare.",
+      "fields": {
+        "device": {
+          "name": "Dispozitiv",
+          "description": "Numele dispozitivului (opțional, necesar doar când sunt configurate mai multe dispozitive)"
+        }
+      }
     }
   },
   "entity": {

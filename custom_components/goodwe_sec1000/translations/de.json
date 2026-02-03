@@ -81,35 +81,87 @@
   "services": {
     "system_started": {
       "name": "System gestartet",
-      "description": "System gestartet"
+      "description": "System gestartet",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "set_export_limit": {
       "name": "Einspeisungslimit setzen",
-      "description": "Setzt den Grenzwert für die Einspeisung für Goodwe SEC1000. Der Wert wird automatisch angepasst, um innerhalb der konfigurierten minimalen und maximalen Grenzwerte zu bleiben."
+      "description": "Setzt den Grenzwert für die Einspeisung für Goodwe SEC1000. Der Wert wird automatisch angepasst, um innerhalb der konfigurierten minimalen und maximalen Grenzwerte zu bleiben.",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "Der Exportgrenzwert in kW"
+        }
+      }
     },
     "get_export_limit": {
       "name": "Einspeisungslimit abrufen",
-      "description": "Liest den aktuellen Wert des Einspeisungslimits und des Steuermodus vom Goodwe SEC1000-Gerät und aktualisiert die Integrationseinstellungen."
+      "description": "Liest den aktuellen Wert des Einspeisungslimits und des Steuermodus vom Goodwe SEC1000-Gerät und aktualisiert die Integrationseinstellungen.",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "export_enable": {
       "name": "Einspeisung aktivieren",
-      "description": "Diese Funktion setzt das Limit für die Energieeinspeisung ins Netz auf den MAXIMALEN Einspeisungswert, der in den Integrationseinstellungen definiert ist."
+      "description": "Diese Funktion setzt das Limit für die Energieeinspeisung ins Netz auf den MAXIMALEN Einspeisungswert, der in den Integrationseinstellungen definiert ist.",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "export_disable": {
       "name": "Einspeisung deaktivieren",
-      "description": "Diese Funktion setzt das Limit für die Energieeinspeisung ins Netz auf den MINIMALEN Einspeisungswert, der in den Integrationseinstellungen definiert ist (Standard = 0)."
+      "description": "Diese Funktion setzt das Limit für die Energieeinspeisung ins Netz auf den MINIMALEN Einspeisungswert, der in den Integrationseinstellungen definiert ist (Standard = 0).",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "export_toggle": {
       "name": "Einspeisungsschalter",
-      "description": "Diese Funktion schaltet den Einspeisungsstatus um. Wenn die Einspeisung derzeit aktiviert ist, wird sie deaktiviert (auf das minimale Einspeisungslimit gesetzt). Wenn die Einspeisung derzeit deaktiviert ist, wird sie aktiviert (auf das maximale Einspeisungslimit gesetzt)."
+      "description": "Diese Funktion schaltet den Einspeisungsstatus um. Wenn die Einspeisung derzeit aktiviert ist, wird sie deaktiviert (auf das minimale Einspeisungslimit gesetzt). Wenn die Einspeisung derzeit deaktiviert ist, wird sie aktiviert (auf das maximale Einspeisungslimit gesetzt).",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "set_datetime": {
       "name": "Datum und Uhrzeit einstellen",
-      "description": "Diese Funktion stellt Datum und Uhrzeit auf dem Gerät ein."
+      "description": "Diese Funktion stellt Datum und Uhrzeit auf dem Gerät ein.",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     },
     "reset_export_watchdog": {
       "name": "Einspeisungs-Watchdog zurücksetzen",
-      "description": "Diese Funktion \"setzt\" den Watchdog im Gerät zurück, der das Einspeisungslimit an den Wechselrichtern steuert. Manchmal hängt sich der Watchdog auf, daher schaltet dieser Dienst das Einspeisungslimit aus und wieder ein, wodurch der Einspeisungs-Watchdog an den Wechselrichtern zurückgesetzt wird."
+      "description": "Diese Funktion \"setzt\" den Watchdog im Gerät zurück, der das Einspeisungslimit an den Wechselrichtern steuert. Manchmal hängt sich der Watchdog auf, daher schaltet dieser Dienst das Einspeisungslimit aus und wieder ein, wodurch der Einspeisungs-Watchdog an den Wechselrichtern zurückgesetzt wird.",
+      "fields": {
+        "device": {
+          "name": "Gerät",
+          "description": "Gerätename (optional, nur erforderlich, wenn mehrere Geräte konfiguriert sind)"
+        }
+      }
     }
   },
   "entity": {

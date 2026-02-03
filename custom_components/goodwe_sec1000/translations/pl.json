@@ -81,35 +81,87 @@
   "services": {
     "system_started": {
       "name": "System uruchomiony",
-      "description": "System uruchomiony"
+      "description": "System uruchomiony",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "set_export_limit": {
       "name": "Ustaw limit eksportu",
-      "description": "Ustawia wartość limitu eksportu dla Goodwe SEC1000. Wartość zostanie automatycznie dostosowana, aby pozostała w ramach skonfigurowanych limitów minimalnych i maksymalnych."
+      "description": "Ustawia wartość limitu eksportu dla Goodwe SEC1000. Wartość zostanie automatycznie dostosowana, aby pozostała w ramach skonfigurowanych limitów minimalnych i maksymalnych.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "Wartość limitu eksportu w kW"
+        }
+      }
     },
     "get_export_limit": {
       "name": "Odczytaj limit eksportu",
-      "description": "Odczytuje aktualną wartość limitu eksportu i trybu sterowania z urządzenia Goodwe SEC1000 i aktualizuje ustawienia integracji."
+      "description": "Odczytuje aktualną wartość limitu eksportu i trybu sterowania z urządzenia Goodwe SEC1000 i aktualizuje ustawienia integracji.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "export_enable": {
       "name": "Włącz eksport",
-      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MAKSYMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji."
+      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MAKSYMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "export_disable": {
       "name": "Wyłącz eksport",
-      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MINIMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji (domyślnie = 0)."
+      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MINIMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji (domyślnie = 0).",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "export_toggle": {
       "name": "Przełącznik Eksportu",
-      "description": "Ta funkcja przełącza stan eksportu. Jeśli eksport jest obecnie włączony, zostanie wyłączony (ustawiony na minimalny limit eksportu). Jeśli eksport jest obecnie wyłączony, zostanie włączony (ustawiony na maksymalny limit eksportu)."
+      "description": "Ta funkcja przełącza stan eksportu. Jeśli eksport jest obecnie włączony, zostanie wyłączony (ustawiony na minimalny limit eksportu). Jeśli eksport jest obecnie wyłączony, zostanie włączony (ustawiony na maksymalny limit eksportu).",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "set_datetime": {
       "name": "Ustaw datę i czas",
-      "description": "Ta funkcja ustawia datę i czas na urządzeniu."
+      "description": "Ta funkcja ustawia datę i czas na urządzeniu.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     },
     "reset_export_watchdog": {
       "name": "Reset Watchdog Eksportu",
-      "description": "Ta funkcja \"resetuje\" watchdog w urządzeniu, który kontroluje limit eksportu na falownikach. Czasami watchdog się zawiesza, więc ta usługa wyłącza i włącza limit eksportu, resetując watchdog eksportu na falownikach."
+      "description": "Ta funkcja \"resetuje\" watchdog w urządzeniu, który kontroluje limit eksportu na falownikach. Czasami watchdog się zawiesza, więc ta usługa wyłącza i włącza limit eksportu, resetując watchdog eksportu na falownikach.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
     }
   },
   "entity": {

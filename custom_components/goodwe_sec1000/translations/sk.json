@@ -81,35 +81,87 @@
   "services": {
     "system_started": {
       "name": "Systém spustený",
-      "description": "Systém spustený"
+      "description": "Systém spustený",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
     "set_export_limit": {
       "name": "Nastaviť limit exportu",
-      "description": "Nastavuje limitnú hodnotu exportu pre Goodwe SEC1000. Hodnota sa automaticky upraví tak, aby zostala v rámci nakonfigurovaných minimálnych a maximálnych limitov."
+      "description": "Nastavuje limitnú hodnotu exportu pre Goodwe SEC1000. Hodnota sa automaticky upraví tak, aby zostala v rámci nakonfigurovaných minimálnych a maximálnych limitov.",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "Hodnota limitu exportu v kW"
+        }
+      }
     },
     "get_export_limit": {
       "name": "Načítať limit exportu",
-      "description": "Načítava aktuálnu hodnotu limitu exportu a režimu riadenia zo zariadenia Goodwe SEC1000 a aktualizuje nastavenia integrácie."
+      "description": "Načítava aktuálnu hodnotu limitu exportu a režimu riadenia zo zariadenia Goodwe SEC1000 a aktualizuje nastavenia integrácie.",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
     "export_enable": {
       "name": "Povoliť export",
-      "description": "Táto funkcia nastaví limit pre export energie do siete na MAXIMÁLNU hodnotu exportu definovanú v nastaveniach integrácie."
+      "description": "Táto funkcia nastaví limit pre export energie do siete na MAXIMÁLNU hodnotu exportu definovanú v nastaveniach integrácie.",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
     "export_disable": {
       "name": "Zakázať export",
-      "description": "Táto funkcia nastavuje limit pre export energie do siete na MINIMÁLNU hodnotu exportu definovanú v nastaveniach integrácie (predvolené = 0)."
+      "description": "Táto funkcia nastavuje limit pre export energie do siete na MINIMÁLNU hodnotu exportu definovanú v nastaveniach integrácie (predvolené = 0).",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
-	"export_toggle": {
+    "export_toggle": {
       "name": "Prepínač Exportu",
-      "description": "Táto funkcia prepína stav exportu. Ak je export momentálne povolený, bude zakázaný (nastavený na minimálny limit exportu). Ak je export momentálne zakázaný, bude povolený (nastavený na maximálny limit exportu)."
+      "description": "Táto funkcia prepína stav exportu. Ak je export momentálne povolený, bude zakázaný (nastavený na minimálny limit exportu). Ak je export momentálne zakázaný, bude povolený (nastavený na maximálny limit exportu).",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
     "set_datetime": {
       "name": "Nastaviť dátum a čas",
-      "description": "Táto funkcia nastavuje dátum a čas na zariadení."
+      "description": "Táto funkcia nastavuje dátum a čas na zariadení.",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     },
     "reset_export_watchdog": {
       "name": "Reset Watchdog Exportu",
-      "description": "Táto funkcia „resetuje“ watchdog v zariadení, ktorý riadi limit exportu na meničoch. Niekedy sa watchdog zasekne, takže táto služba vypne a zapne limit exportu, čím sa resetuje watchdog exportu na meničoch."
+      "description": "Táto funkcia „resetuje“ watchdog v zariadení, ktorý riadi limit exportu na meničoch. Niekedy sa watchdog zasekne, takže táto služba vypne a zapne limit exportu, čím sa resetuje watchdog exportu na meničoch.",
+      "fields": {
+        "device": {
+          "name": "Zariadenie",
+          "description": "Názov zariadenia (voliteľné, povinné len pri viacerých nakonfigurovaných zariadeniach)"
+        }
+      }
     }
   },
   "entity": {
@@ -180,7 +232,7 @@
       "reset_export_watchdog_feedback": {
         "name": "Watchdog exportu resetovaný - Feedback"
       }
-	},
+    },
     "button": {
       "reset_export_watchdog": {
         "name": "Reset Watchdog Exportu"
