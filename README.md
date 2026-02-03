@@ -301,6 +301,15 @@ The integration provides several control entities for managing export power and 
 ## 🛠️ Services
 
 The integration provides several services for advanced control and automation.
+If only one device is installed, the command for calling the service is simple without additional parameters.
+**Example**: `goodwe_sec1000.set_datetime`
+
+If more than one device is used, it is necessary to define for which device the command is intended with the "Device" parameter, this uses the Unique device name (for example, the serial number) that you entered when installing the device. 
+**Example**: 
+`goodwe_sec1000.set_datetime
+data:
+  device: E04M80`
+
 
 ### 🚫 Export Disable (`export_disable`)
 
