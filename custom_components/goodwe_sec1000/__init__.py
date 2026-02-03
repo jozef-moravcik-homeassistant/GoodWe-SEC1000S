@@ -12,7 +12,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, Platform
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 import homeassistant.helpers.config_validation as cv
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.event import async_call_later, async_track_time_interval
 from homeassistant.helpers.storage import Store
@@ -28,6 +28,36 @@ from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
+
+def _get_entry_id_for_device(hass: HomeAssistant, device: str = None) -> str:
+    """Get entry_id for specified device or return the only one if device not specified."""
+    if DOMAIN not in hass.data or not hass.data[DOMAIN]:
+        raise ValueError("No Goodwe SEC1000 integrations configured")
+    
+    # Ak je device zadaný, nájdeme zariadenie s týmto názvom (case insensitive)
+    if device:
+        device_lower = device.lower()
+        for entry_id, data in hass.data[DOMAIN].items():
+            device_name = data.get("device_name_sanitized", "")
+            if device_name.lower() == device_lower:
+                return entry_id
+        raise ValueError(f"Device '{device}' not found")
+    
+    # Ak device nie je zadaný
+    entry_ids = list(hass.data[DOMAIN].keys())
+    
+    if len(entry_ids) == 1:
+        # Len jedno zariadenie - použijeme ho
+        return entry_ids[0]
+    elif len(entry_ids) > 1:
+        # Viac zariadení - musí byť zadaný parameter device
+        available_devices = [data.get("device_name_sanitized") for data in hass.data[DOMAIN].values()]
+        raise ValueError(
+            f"Multiple devices configured. Please specify 'device' parameter. "
+            f"Available devices: {', '.join(available_devices)}"
+        )
+    else:
+        raise ValueError("No devices configured")
 
 # Konštanta pre názov úložiska
 STORAGE_VERSION = 1
@@ -147,6 +177,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     # Nastavenie entity IDs po nastavení device_name
     instance.setup_entity_ids()
+    
+    # Service domain je fixný pre všetky zariadenia
+    service_domain = DOMAIN  # "goodwe_sec1000"
 
     try:
         await hass.async_add_executor_job(instance.sec1000_get_telemetry_data)
@@ -165,6 +198,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN][entry.entry_id] = {
             "instance": instance,
             CONF_DEVICE_NAME: device_name,
+            "device_name_sanitized": sanitize_device_name(device_name),
             CONF_INCLUDE_DEVICE_NAME_IN_ENTITY: include_device_name_in_entity,
             "host": host,
             "scan_interval": scan_interval,
@@ -172,14 +206,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "max_export_limit": max_export_limit,
             "total_capacity": total_capacity,
             "export_limit_control_mode": export_limit_control_mode,
-            "scan_three_phases": scan_three_phases
+            "scan_three_phases": scan_three_phases,
         }
-        # Registrácia služieb
+        # Registrácia služieb pod fixnou doménou
         if not hass.services.has_service(DOMAIN, SERVICE_SYSTEM_STARTED):
             hass.services.async_register(
                 DOMAIN,
                 SERVICE_SYSTEM_STARTED,
                 system_started_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_SET_EXPORT_LIMIT):
@@ -189,6 +226,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 set_export_limit_service,
                 schema=vol.Schema({
                     vol.Required("limit"): vol.Any(vol.Coerce(float), cv.string),
+                    vol.Optional("device"): cv.string,
                 })
             )
 
@@ -197,6 +235,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_GET_EXPORT_LIMIT,
                 get_export_limit_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_EXPORT_ENABLE):
@@ -204,6 +245,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_EXPORT_ENABLE,
                 export_enable_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_EXPORT_DISABLE):
@@ -211,6 +255,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_EXPORT_DISABLE,
                 export_disable_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_EXPORT_TOGGLE):
@@ -218,6 +265,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_EXPORT_TOGGLE,
                 export_toggle_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_SET_DATETIME):
@@ -225,6 +275,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_SET_DATETIME,
                 set_datetime_service,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         if not hass.services.has_service(DOMAIN, SERVICE_RESET_EXPORT_WATCHDOG):
@@ -232,6 +285,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 DOMAIN,
                 SERVICE_RESET_EXPORT_WATCHDOG,
                 reset_export_watchdog,
+                schema=vol.Schema({
+                    vol.Optional("device"): cv.string,
+                })
             )
 
         # Register update listener for options changes
@@ -239,7 +295,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         # Wrapper funkcia pre bezpečné volanie async funkcie
         async def _schedule_callback(_now=None):
-            await async_call_get_export_limit_callback(hass)
+            await async_call_get_export_limit_callback(hass, entry.entry_id)
         
         # Schedule get_export_limit to run after a delay to ensure all is initialized
         async_call_later(hass, 15, _schedule_callback)
@@ -291,28 +347,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def system_started_service(call: ServiceCall) -> None:
     """Handle system started service call."""
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
             await call.hass.async_add_executor_job(instance.system_started)
 
+    except ValueError as ex:
+        _LOGGER.error("Error in system_started_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
     except Exception as ex:
-        _LOGGER.error("Error in system_started: %s", ex)
+        _LOGGER.error("Error in system_started_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 # Async function for the callback
-async def async_call_get_export_limit_callback(hass):
+async def async_call_get_export_limit_callback(hass, entry_id):
     """Call the services during initialization (async callback)."""
     try:
-        # Volanie prvej služby
+        # Získanie device_name_sanitized pre toto zariadenie
+        device_name_sanitized = hass.data[DOMAIN][entry_id].get("device_name_sanitized")
+        if not device_name_sanitized:
+            _LOGGER.error("Device name not found for entry_id: %s", entry_id)
+            return
+            
+        # Volanie prvej služby s parametrom device
         await hass.services.async_call(
             DOMAIN,
             SERVICE_SYSTEM_STARTED,
-            {},
+            {"device": device_name_sanitized},
             blocking=False
         )
         
@@ -321,7 +384,7 @@ async def async_call_get_export_limit_callback(hass):
         await hass.services.async_call(
             DOMAIN,
             SERVICE_GET_EXPORT_LIMIT,
-            {},
+            {"device": device_name_sanitized},
             blocking=False
         )
     except Exception as ex:
@@ -341,13 +404,8 @@ async def save_export_state(hass: HomeAssistant, export_state: bool):
 async def set_export_limit_service(call: ServiceCall) -> None:
     """Service to set the export limit."""
     try:
-        # Nájdenie entry_id, ktoré chceme aktualizovať
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-        
-        # Použitie prvého nájdeného entry_id, ak nie je špecifikované
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         
         # Získanie reťazca limitu
         limit_str = str(call.data.get("limit", "0"))
@@ -402,19 +460,21 @@ async def set_export_limit_service(call: ServiceCall) -> None:
 
         else:
             _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
+    except ValueError as ex:
+        _LOGGER.error("Error in set_export_limit_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in set_export_limit_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def get_export_limit_service(call: ServiceCall) -> bool:
     """Service to get the export limit and update settings."""
     try:
-        # Nájdenie entry_id, ktoré chceme aktualizovať
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-        
-        # Použitie prvého nájdeného entry_id, ak nie je špecifikované
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
         
         if instance:
@@ -465,17 +525,21 @@ async def get_export_limit_service(call: ServiceCall) -> bool:
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
         else:
             _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
+    except ValueError as ex:
+        _LOGGER.error("Error in get_export_limit_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in get_export_limit_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def export_enable_service(call: ServiceCall) -> None:
     """Simple service which enable export following re-setup values and parameters """
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
@@ -486,18 +550,24 @@ async def export_enable_service(call: ServiceCall) -> None:
             await save_export_state(call.hass, True)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        else:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
 
+    except ValueError as ex:
+        _LOGGER.error("Error in export_enable_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in export_enable_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def export_disable_service(call: ServiceCall) -> None:
     """Simple service which disable export following re-setup values and parameters """
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
@@ -508,18 +578,24 @@ async def export_disable_service(call: ServiceCall) -> None:
             await save_export_state(call.hass, False)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        else:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
 
+    except ValueError as ex:
+        _LOGGER.error("Error in export_disable_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in export_disable_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def export_toggle_service(call: ServiceCall) -> None:
     """Simple service which toggles export state """
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
@@ -539,17 +615,23 @@ async def export_toggle_service(call: ServiceCall) -> None:
             
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        else:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
 
+    except ValueError as ex:
+        _LOGGER.error("Error in export_toggle_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in export_toggle_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def set_datetime_service(call: ServiceCall) -> None:
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
@@ -558,18 +640,24 @@ async def set_datetime_service(call: ServiceCall) -> None:
             await call.hass.async_add_executor_job(instance.set_datetime)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        else:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
 
+    except ValueError as ex:
+        _LOGGER.error("Error in set_datetime_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
         _LOGGER.error("Error in set_datetime_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 async def reset_export_watchdog(call: ServiceCall) -> None:
     """Simple service which "reset" watchdog which controlls export limit on the converters """
     try:
-        if DOMAIN not in call.hass.data or not call.hass.data[DOMAIN]:
-            _LOGGER.error("No Goodwe SEC1000 integrations configured")
-            return
-
-        entry_id = next(iter(call.hass.data[DOMAIN].keys()))
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
         instance = call.hass.data[DOMAIN][entry_id].get("instance")
 
         if instance:
@@ -578,9 +666,18 @@ async def reset_export_watchdog(call: ServiceCall) -> None:
             await call.hass.async_add_executor_job(instance.reset_export_watchdog)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        else:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
 
+    except ValueError as ex:
+        _LOGGER.error("Error in reset_export_watchdog: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
     except Exception as ex:
-        _LOGGER.error("Error in export_enable_service: %s", ex)
+        _LOGGER.error("Error in reset_export_watchdog: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -695,6 +792,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "instance": instance,
+        "device_name_sanitized": sanitize_device_name(device_name),
         "host": host,
         "scan_interval": scan_interval,
         "min_export_limit": min_export_limit,

@@ -1,7 +1,14 @@
 system_started:
   name: System started
   description: Initialize the controller
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 set_export_limit:
   name: Set export limit
@@ -17,33 +24,82 @@ set_export_limit:
           max: 100
           step: 0.1
           unit_of_measurement: kW
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 get_export_limit:
   name: Get export limit
   description: Reads the current export limit and control mode values from the Goodwe SEC1000 device and updates the integration settings.
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 export_enable:
   name: Export Enable
   description: This function sets the limit for Power Export to the Grid to the MAXIMUM export value defined in the integration settings.
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 export_disable:
   name: Export Disable
   description: This function sets the limit for Power Export to the Grid to the MINIMUM export value defined in the integration settings (default = 0)
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 export_toggle:
   name: Export Toggle
   description: This function toggles the export state. If export is currently enabled, it will be disabled (set to minimum export limit). If export is currently disabled, it will be enabled (set to maximum export limit).
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 set_datetime:
   name: Set Date and Time
   description: This function sets the Date and Time on the device.
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
 
 reset_export_watchdog:
   name: Reset Export Watchdog
   description: This function "Reset" a Watchdog which controlls an export limit on the converters. Sometimes the watchdog is freezed so, this service switch off and switch on the export limit, which reset the watchdog on the inverters.
-  fields: {}
+  fields:
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
