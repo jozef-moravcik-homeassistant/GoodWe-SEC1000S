@@ -183,12 +183,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         await hass.async_add_executor_job(instance.sec1000_get_telemetry_data)
-        
-        # Prenos konfiguračných údajov do zariadenia
-        current_limit = instance.settings.export_limit if instance.settings.export_limit > 0 else min_export_limit
-        await hass.async_add_executor_job(instance.set_export_limit, current_limit)
-        
-        # Krátke oneskorenie pred vyčítaním dát, aby zariadenie stihlo spracovať príkaz
+
+        # Zariadenie odpovedá – nastavíme modul_started=True PRED registráciou platforiem,
+        # aby žiadna externá automatizácia (napr. homeassistant.start) nemohla zavolať
+        # export_enable/disable ešte pred tým, ako je zariadenie pripravené.
+        # Bez tohto by export_enable_feedback dostalo hodnotu FEEDBACK_UNKNOWN_ERROR=4.
+        instance.settings.modul_started = True
+
+        # Vyčítanie aktuálneho stavu exportu zo zariadenia pred registráciou platforiem,
+        # aby senzory a prepínač mali správny stav hneď po štarte.
+        # POZOR: set_export_limit() sa tu úmyselne NEVOLÁ – pred touto opravou bola
+        # táto funkcia vždy no-op (guard modul_started=False). Keby sa zavolala teraz,
+        # zapísala by do zariadenia 4 TCP príkazy hneď po čítaní, čo by spôsobilo
+        # nesprávne načítanie stavu exportu pri následnom get_export_limit() v 15s callbacku.
+        await hass.async_add_executor_job(instance.get_export_limit)
+
+        # Krátke oneskorenie
         await asyncio.sleep(4)
         
         # Vynútenie okamžitého vyčítania dát
@@ -320,7 +330,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 async_dispatcher_send(hass, f"{DOMAIN}_feedback_update_{entry.entry_id}")
                 _LOGGER.debug(f"Telemetry data updated for {entry.entry_id}")
             except Exception as ex:
-                _LOGGER.error(f"Error updating telemetry data: {ex}")
+                _LOGGER.debug(f"Error updating telemetry data: {ex}")
         
         # Nastaviť pravidelný časovač pre aktualizáciu telemetrie
         from datetime import timedelta
@@ -339,7 +349,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_dispatcher_send(hass, f"{DOMAIN}_settings_update_{entry.entry_id}")
 
     except Exception as ex:
-        _LOGGER.error("Failed to connect to Goodwe SEC1000: %s", ex)
+        _LOGGER.debug("Failed to connect to Goodwe SEC1000: %s", ex)
         raise ConfigEntryNotReady from ex
 
     return True

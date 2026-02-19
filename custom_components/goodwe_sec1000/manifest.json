@@ -10,5 +10,5 @@
     "issue_tracker": "https://github.com/jozef-moravcik-homeassistant/goodwe-sec1000s/issues",
     "loggers": ["goodwe_sec1000"],
     "requirements": ["crccheck==1.1"],
-    "version": "1.01.01"
+    "version": "1.01.02"
 }

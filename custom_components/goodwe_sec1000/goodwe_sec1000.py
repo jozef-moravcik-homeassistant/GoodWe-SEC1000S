@@ -197,7 +197,7 @@ class Goodwe_SEC1000_Instance:
             LOGGER.info(f"System Started")
             LOGGER.info("Calling get_export_limit service after startup")
         except Exception as e:
-            LOGGER.error(f"Error during System Started")
+            LOGGER.debug(f"Error during System Started")
 #            time.sleep(wait_retry)
 
 # ******************************************************************************************
@@ -258,18 +258,18 @@ class Goodwe_SEC1000_Instance:
                     return True
                 else:
                     self.settings.get_telemetry_data_feedback |= FEEDBACK_COMMUNICATION_ERROR_CRC
-                    LOGGER.error(f"CRC error when reading telemetry data")
+                    LOGGER.debug(f"CRC error when reading telemetry data")
                     return False
             
             except socket.error as e:
                 self.settings.get_telemetry_data_feedback |= FEEDBACK_COMMUNICATION_ERROR_SOCKET
-                LOGGER.error(f"Socket error during telemetry read (try {i}/{num_retries}): {e}")
+                LOGGER.debug(f"Socket error during telemetry read (try {i}/{num_retries}): {e}")
                 time.sleep(wait_retry)
                 return False
 
             except Exception as e:
                 self.settings.get_telemetry_data_feedback |= FEEDBACK_UNKNOWN_ERROR
-                LOGGER.error(f"Error during telemetry read (try {i}/{num_retries}): {e}")
+                LOGGER.debug(f"Error during telemetry read (try {i}/{num_retries}): {e}")
                 time.sleep(wait_retry)
                 return False
 
@@ -408,19 +408,19 @@ class Goodwe_SEC1000_Instance:
                 return True
             else:
                 self.settings.get_export_limit_feedback |= FEEDBACK_COMMUNICATION_ERROR_CRC
-                LOGGER.error("Failed to read export limit: No data received or CRC error")
+                LOGGER.debug("Failed to read export limit: No data received or CRC error")
                 raise Exception("Failed to read export limit: No data received or CRC error")
                 return False
 
         except socket.error as e:
             self.settings.get_export_limit_feedback |= FEEDBACK_COMMUNICATION_ERROR_SOCKET
-            LOGGER.error(f"Socket error during Export Power Limit read: {e}")
+            LOGGER.debug(f"Socket error during Export Power Limit read: {e}")
             raise
             return False
 
         except Exception as e:
             self.settings.get_export_limit_feedback |= FEEDBACK_UNKNOWN_ERROR
-            LOGGER.error(f"Error during Export Power Limit read: {e}")
+            LOGGER.debug(f"Error during Export Power Limit read: {e}")
             raise
             return False
 
@@ -511,26 +511,26 @@ class Goodwe_SEC1000_Instance:
                         return False
                 else:
                     self.settings.set_export_limit_feedback |= FEEDBACK_COMMUNICATION_ERROR_UNEXPECTED_RETURNED_PACKET
-                    LOGGER.error(f"Set Export Limit: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
+                    LOGGER.debug(f"Set Export Limit: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
                     self.print_packet(rx_data)
                     return False
             else:
                 self.settings.set_export_limit_feedback |= FEEDBACK_COMMUNICATION_ERROR_CRC
-                LOGGER.error("Failed to set export limit: CRC error")
+                LOGGER.debug("Failed to set export limit: CRC error")
                 raise Exception("Failed to set export limit: CRC error")
                 return False
 
         except (ValueError, TypeError) as e:
             self.settings.set_export_limit_feedback |= FEEDBACK_INVALID_INPUT_PARAMETER
-            LOGGER.error(f"Set Export Limit: Invalid export limit value: {limit}. Error: {e}")
+            LOGGER.debug(f"Set Export Limit: Invalid export limit value: {limit}. Error: {e}")
             return False
         except socket.error as e:
             self.settings.set_export_limit_feedback |= FEEDBACK_COMMUNICATION_ERROR_SOCKET
-            LOGGER.error(f"Set Export Limit: Socket error: {e}")
+            LOGGER.debug(f"Set Export Limit: Socket error: {e}")
             return False
         except Exception as e:
             self.settings.set_export_limit_feedback |= FEEDBACK_UNKNOWN_ERROR
-            LOGGER.error(f"Set Export Limit: Unexpected error: {e}")
+            LOGGER.debug(f"Set Export Limit: Unexpected error: {e}")
             return False
 
 # ******************************************************************************************
@@ -581,14 +581,14 @@ class Goodwe_SEC1000_Instance:
                     LOGGER.info(f"Set Export Limit Controlled by Value is {msgstate}. Data sucessfully save to device.")
                     return True
                 else:
-                    LOGGER.error(f"Set Export Limit Controlled by Value: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
+                    LOGGER.debug(f"Set Export Limit Controlled by Value: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
                     self.print_packet(rx_data)
                     return False
 
         except socket.error as e:
-            LOGGER.error(f"Set Export Limit Controlled by Value: Socket error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by Value: Socket error: {e}")
         except Exception as e:
-            LOGGER.error(f"Set Export Limit Controlled by Value: Unexpected error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by Value: Unexpected error: {e}")
 
 # ******************************************************************************************
 # ******************* Set Export Power Limit Controled by DRED *****************************
@@ -611,14 +611,14 @@ class Goodwe_SEC1000_Instance:
                     LOGGER.info(f"Set Export Limit Controlled by DRED is {msgstate}. Data sucessfully save to device.")
                     return True
                 else:
-                    LOGGER.error(f"Set Export Limit Controlled by DRED: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
+                    LOGGER.debug(f"Set Export Limit Controlled by DRED: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
                     self.print_packet(rx_data)
                     return False
 
         except socket.error as e:
-            LOGGER.error(f"Set Export Limit Controlled by DRED: Socket error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by DRED: Socket error: {e}")
         except Exception as e:
-            LOGGER.error(f"Set Export Limit Controlled by DRED: Unexpected error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by DRED: Unexpected error: {e}")
 
 # ******************************************************************************************
 # ******************* Set Export Power Limit Controled by RCR ******************************
@@ -641,14 +641,14 @@ class Goodwe_SEC1000_Instance:
                     LOGGER.info(f"Set Export Limit Controlled by RCR is {msgstate}. Data sucessfully save to device.")
                     return True
                 else:
-                    LOGGER.error(f"Set Export Limit Controlled by RCR: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
+                    LOGGER.debug(f"Set Export Limit Controlled by RCR: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
                     self.print_packet(rx_data)
                     return False
 
         except socket.error as e:
-            LOGGER.error(f"Set Export Limit Controlled by RCR: Socket error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by RCR: Socket error: {e}")
         except Exception as e:
-            LOGGER.error(f"Set Export Limit Controlled by RCR: Unexpected error: {e}")
+            LOGGER.debug(f"Set Export Limit Controlled by RCR: Unexpected error: {e}")
 
 # ******************************************************************************************
 # ************************** Set Date/Time *************************************************
@@ -686,22 +686,22 @@ class Goodwe_SEC1000_Instance:
                     return True
                 else:
                     self.settings.set_datetime_feedback |= FEEDBACK_COMMUNICATION_ERROR_UNEXPECTED_RETURNED_PACKET
-                    LOGGER.error(f"Set Date Time: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
+                    LOGGER.debug(f"Set Date Time: Unexpected Error: The device sent an incorrect confirmation of the command execution.")
                     self.print_packet(rx_data)
                     return False
             else:
                 self.settings.set_datetime_feedback |= FEEDBACK_COMMUNICATION_ERROR_CRC
-                LOGGER.error("Failed to set date time: CRC error")
+                LOGGER.debug("Failed to set date time: CRC error")
                 raise Exception("Failed to set date time: CRC error")
                 return False
 
         except socket.error as e:
             self.settings.set_datetime_feedback |= FEEDBACK_COMMUNICATION_ERROR_SOCKET
-            LOGGER.error(f"Set Date Time: Socket error: {e}")
+            LOGGER.debug(f"Set Date Time: Socket error: {e}")
             return False
         except Exception as e:
             self.settings.set_datetime_feedback |= FEEDBACK_UNKNOWN_ERROR
-            LOGGER.error(f"Set Date Time: Unexpected error: {e}")
+            LOGGER.debug(f"Set Date Time: Unexpected error: {e}")
             return False
 
 # ******************************************************************************************
@@ -727,12 +727,12 @@ class Goodwe_SEC1000_Instance:
                 return True
             else:
                 self.settings.reset_export_watchdog_feedback |= FEEDBACK_UNKNOWN_ERROR
-                LOGGER.error(f"Reset Export Watchdog: Unexpected error")
+                LOGGER.debug(f"Reset Export Watchdog: Unexpected error")
                 return False
 
         except Exception as e:
             self.settings.reset_export_watchdog_feedback |= FEEDBACK_UNKNOWN_ERROR
-            LOGGER.error(f"Reset Export Watchdog: Unexpected error: {e}")
+            LOGGER.debug(f"Reset Export Watchdog: Unexpected error: {e}")
             return False
 
 # ******************************************************************************************
@@ -761,13 +761,13 @@ class Goodwe_SEC1000_Instance:
                     if self.check_goodwe_sec1000_crc(rx_payload):
                         return rx_payload
                     else:
-                        LOGGER.error(f"CRC error on packet: " + ' '.join([f'{byte:02X}' for byte in rx_payload]))
+                        LOGGER.debug(f"CRC error on packet: " + ' '.join([f'{byte:02X}' for byte in rx_payload]))
                         return b""
                 else:
                     return b""
 
         except Exception as e:
-            LOGGER.error(f"Error in sec1000_tx_rx_data: {e}")
+            LOGGER.debug(f"Error in sec1000_tx_rx_data: {e}")
             raise
 
 # ******************************************************************************************
