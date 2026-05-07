@@ -11,4 +11,19 @@ Home Assistant integration for GoodWe Smart Energy Controller SEC1000/S
 ## 📋 Changes
 
 - New service set_min_export_limit for setting up a configuration parameter "Minimum export limit (kW)"
+**Example:**
+
+```yaml
+action: goodwe_sec1000.set_min_export_limit
+data:
+  limit: 0.7
+```
+
 - New service set_max_export_limit for setting up a configuration parameter "Maximum export limit (kW)"
+**Example:**
+
+```yaml
+action: goodwe_sec1000.set_max_export_limit
+data:
+  limit: 10
+```
