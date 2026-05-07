@@ -725,25 +725,27 @@ async def set_min_export_limit_service(call: ServiceCall) -> None:
 
         new_limit = float(call.data["limit"])
 
-        # Aktualizácia nastavení inštancie
+        # Aktualizácia inštancie a hass.data PRED spustením update_listener —
+        # update_listener tak uvidí old_min == new_limit a nepošle hodnotu znovu do zariadenia
         instance.settings.min_export_limit = new_limit
         call.hass.data[DOMAIN][entry_id]["min_export_limit"] = new_limit
 
-        # Persistencia do entry.data (nespustí update_listener)
+        # Ak je export vypnutý, odošli novú hodnotu do zariadenia
+        if not instance.settings.export_state:
+            _LOGGER.info(f"set_min_export_limit: export OFF -> sending {new_limit}kW to device")
+            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+
+        # Persistencia do entry.options (má prioritu pred entry.data pri čítaní nastavení)
+        # async_update_entry spustí update_listener, ten však neuvidí zmenu min_export_limit
         config_entries = call.hass.config_entries.async_entries(DOMAIN)
         entry = next((e for e in config_entries if e.entry_id == entry_id), None)
         if entry:
-            new_data = dict(entry.data)
-            new_data[CONF_MIN_EXPORT_LIMIT] = new_limit
-            call.hass.config_entries.async_update_entry(entry, data=new_data)
-
-        # Ak je export vypnutý, odošli novú hodnotu do zariadenia
-        if not instance.settings.export_state:
-            _LOGGER.info(f"set_min_export_limit: export OFF → sending {new_limit}kW to device")
-            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
-
-        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+            new_options = dict(entry.options)
+            new_options[CONF_MIN_EXPORT_LIMIT] = new_limit
+            call.hass.config_entries.async_update_entry(entry, options=new_options)
+        else:
+            async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+            async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
 
     except ValueError as ex:
         _LOGGER.error("Error in set_min_export_limit_service: %s", ex)
@@ -768,25 +770,27 @@ async def set_max_export_limit_service(call: ServiceCall) -> None:
 
         new_limit = float(call.data["limit"])
 
-        # Aktualizácia nastavení inštancie
+        # Aktualizácia inštancie a hass.data PRED spustením update_listener —
+        # update_listener tak uvidí old_max == new_limit a nepošle hodnotu znovu do zariadenia
         instance.settings.max_export_limit = new_limit
         call.hass.data[DOMAIN][entry_id]["max_export_limit"] = new_limit
 
-        # Persistencia do entry.data (nespustí update_listener)
+        # Ak je export zapnutý, odošli novú hodnotu do zariadenia
+        if instance.settings.export_state:
+            _LOGGER.info(f"set_max_export_limit: export ON -> sending {new_limit}kW to device")
+            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+
+        # Persistencia do entry.options (má prioritu pred entry.data pri čítaní nastavení)
+        # async_update_entry spustí update_listener, ten však neuvidí zmenu max_export_limit
         config_entries = call.hass.config_entries.async_entries(DOMAIN)
         entry = next((e for e in config_entries if e.entry_id == entry_id), None)
         if entry:
-            new_data = dict(entry.data)
-            new_data[CONF_MAX_EXPORT_LIMIT] = new_limit
-            call.hass.config_entries.async_update_entry(entry, data=new_data)
-
-        # Ak je export zapnutý, odošli novú hodnotu do zariadenia
-        if instance.settings.export_state:
-            _LOGGER.info(f"set_max_export_limit: export ON → sending {new_limit}kW to device")
-            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
-
-        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+            new_options = dict(entry.options)
+            new_options[CONF_MAX_EXPORT_LIMIT] = new_limit
+            call.hass.config_entries.async_update_entry(entry, options=new_options)
+        else:
+            async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+            async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
 
     except ValueError as ex:
         _LOGGER.error("Error in set_max_export_limit_service: %s", ex)
