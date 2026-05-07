@@ -300,6 +300,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 })
             )
 
+        if not hass.services.has_service(DOMAIN, SERVICE_SET_MIN_EXPORT_LIMIT):
+            hass.services.async_register(
+                DOMAIN,
+                SERVICE_SET_MIN_EXPORT_LIMIT,
+                set_min_export_limit_service,
+                schema=vol.Schema({
+                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.Optional("device"): cv.string,
+                })
+            )
+
+        if not hass.services.has_service(DOMAIN, SERVICE_SET_MAX_EXPORT_LIMIT):
+            hass.services.async_register(
+                DOMAIN,
+                SERVICE_SET_MAX_EXPORT_LIMIT,
+                set_max_export_limit_service,
+                schema=vol.Schema({
+                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.Optional("device"): cv.string,
+                })
+            )
+
         # Register update listener for options changes
         entry.async_on_unload(entry.add_update_listener(update_listener))
 
@@ -690,6 +712,92 @@ async def reset_export_watchdog(call: ServiceCall) -> None:
         raise HomeAssistantError(f"Unexpected error: {ex}") from ex
 
 
+async def set_min_export_limit_service(call: ServiceCall) -> None:
+    """Service to set the minimum export limit configuration parameter."""
+    try:
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
+        instance = call.hass.data[DOMAIN][entry_id].get("instance")
+
+        if not instance:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
+
+        new_limit = float(call.data["limit"])
+
+        # Aktualizácia nastavení inštancie
+        instance.settings.min_export_limit = new_limit
+        call.hass.data[DOMAIN][entry_id]["min_export_limit"] = new_limit
+
+        # Persistencia do entry.data (nespustí update_listener)
+        config_entries = call.hass.config_entries.async_entries(DOMAIN)
+        entry = next((e for e in config_entries if e.entry_id == entry_id), None)
+        if entry:
+            new_data = dict(entry.data)
+            new_data[CONF_MIN_EXPORT_LIMIT] = new_limit
+            call.hass.config_entries.async_update_entry(entry, data=new_data)
+
+        # Ak je export vypnutý, odošli novú hodnotu do zariadenia
+        if not instance.settings.export_state:
+            _LOGGER.info(f"set_min_export_limit: export OFF → sending {new_limit}kW to device")
+            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+
+        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+
+    except ValueError as ex:
+        _LOGGER.error("Error in set_min_export_limit_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
+    except Exception as ex:
+        _LOGGER.error("Error in set_min_export_limit_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
+
+
+async def set_max_export_limit_service(call: ServiceCall) -> None:
+    """Service to set the maximum export limit configuration parameter."""
+    try:
+        device = call.data.get("device")
+        entry_id = _get_entry_id_for_device(call.hass, device)
+        instance = call.hass.data[DOMAIN][entry_id].get("instance")
+
+        if not instance:
+            _LOGGER.error("Instance not found for entry_id %s", entry_id)
+            raise HomeAssistantError(f"Instance not found for entry_id {entry_id}")
+
+        new_limit = float(call.data["limit"])
+
+        # Aktualizácia nastavení inštancie
+        instance.settings.max_export_limit = new_limit
+        call.hass.data[DOMAIN][entry_id]["max_export_limit"] = new_limit
+
+        # Persistencia do entry.data (nespustí update_listener)
+        config_entries = call.hass.config_entries.async_entries(DOMAIN)
+        entry = next((e for e in config_entries if e.entry_id == entry_id), None)
+        if entry:
+            new_data = dict(entry.data)
+            new_data[CONF_MAX_EXPORT_LIMIT] = new_limit
+            call.hass.config_entries.async_update_entry(entry, data=new_data)
+
+        # Ak je export zapnutý, odošli novú hodnotu do zariadenia
+        if instance.settings.export_state:
+            _LOGGER.info(f"set_max_export_limit: export ON → sending {new_limit}kW to device")
+            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+
+        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+
+    except ValueError as ex:
+        _LOGGER.error("Error in set_max_export_limit_service: %s", ex)
+        raise HomeAssistantError(str(ex)) from ex
+    except HomeAssistantError:
+        raise
+    except Exception as ex:
+        _LOGGER.error("Error in set_max_export_limit_service: %s", ex)
+        raise HomeAssistantError(f"Unexpected error: {ex}") from ex
+
+
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     # Získanie údajov z konfigurácie
@@ -815,10 +923,18 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     # Nastavenie nových entít
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
-    # Prenos konfiguračných údajov do zariadenia (total_capacity, export_limit_control_mode, scan_three_phases)
-    # Použijeme existujúci export_limit alebo min_export_limit
-    current_limit = instance.settings.export_limit if instance.settings.export_limit > 0 else min_export_limit
-    await hass.async_add_executor_job(instance.set_export_limit, current_limit)
+    # Prenos konfiguračných údajov do zariadenia len keď sa zmenili limity a zodpovedajú aktuálnemu stavu exportu:
+    # - ak sa zmenil min_export_limit A export je vypnutý → odošli min_export_limit do zariadenia
+    # - ak sa zmenil max_export_limit A export je zapnutý → odošli max_export_limit do zariadenia
+    old_min = old_data.get("min_export_limit") if old_data else None
+    old_max = old_data.get("max_export_limit") if old_data else None
+
+    if old_min is not None and old_min != min_export_limit and not instance.settings.export_state:
+        _LOGGER.info(f"update_listener: min_export_limit changed {old_min} → {min_export_limit}, export OFF → sending to device")
+        await hass.async_add_executor_job(instance.set_export_limit, min_export_limit)
+    elif old_max is not None and old_max != max_export_limit and instance.settings.export_state:
+        _LOGGER.info(f"update_listener: max_export_limit changed {old_max} → {max_export_limit}, export ON → sending to device")
+        await hass.async_add_executor_job(instance.set_export_limit, max_export_limit)
     
     # NEBUDEME volať get_telemetry_data, aby sa zachovali existujúce hodnoty senzorov
     # Nové hodnoty sa načítajú pri najbližšom pravidelnom update cykle

@@ -6,10 +6,9 @@
 
 Home Assistant integration for GoodWe Smart Energy Controller SEC1000/S
 
-## v1.01.02
-
----
+## v1.01.03
 
 ## 📋 Changes
 
-- Fixed issue: "Export status" update after HA start/restart
+- New service set_min_export_limit for setting up a configuration parameter "Minimum export limit (kW)"
+- New service set_max_export_limit for setting up a configuration parameter "Maximum export limit (kW)"

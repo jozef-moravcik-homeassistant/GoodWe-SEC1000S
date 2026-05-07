@@ -39,6 +39,8 @@ SERVICE_EXPORT_DISABLE = "export_disable"
 SERVICE_EXPORT_TOGGLE = "export_toggle"
 SERVICE_SET_DATETIME = "set_datetime"
 SERVICE_RESET_EXPORT_WATCHDOG = "reset_export_watchdog"
+SERVICE_SET_MIN_EXPORT_LIMIT = "set_min_export_limit"
+SERVICE_SET_MAX_EXPORT_LIMIT = "set_max_export_limit"
 
 ##############################################################################################################################
 # Internal entity names (will be prefixed with DOMAIN in code) ###############################################################
@@ -75,6 +77,9 @@ ENTITY_BUTTON_export_disable = "export_disable"
 
 # Switch entities
 ENTITY_SWITCH_export_to_grid = "export_to_grid"
+
+# Number entities
+ENTITY_NUMBER_export_limit = "export_limit"
 
 ##############################################################################################################################
 # Configuration keys #########################################################################################################

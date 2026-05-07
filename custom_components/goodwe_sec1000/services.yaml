@@ -103,3 +103,47 @@ reset_export_watchdog:
       example: "e04m80"
       selector:
         text:
+
+set_min_export_limit:
+  name: Set Minimum Export Limit
+  description: Sets the "Minimálny limit exportu" configuration parameter. If export is currently disabled, the new value is immediately sent to the device.
+  fields:
+    limit:
+      name: Limit
+      description: The minimum export limit value in kW.
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.1
+          unit_of_measurement: kW
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
+
+set_max_export_limit:
+  name: Set Maximum Export Limit
+  description: Sets the "Maximálny limit exportu" configuration parameter. If export is currently enabled, the new value is immediately sent to the device.
+  fields:
+    limit:
+      name: Limit
+      description: The maximum export limit value in kW.
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.1
+          unit_of_measurement: kW
+    device:
+      name: Device
+      description: Device name (optional, required only when multiple devices are configured)
+      required: false
+      example: "e04m80"
+      selector:
+        text:
