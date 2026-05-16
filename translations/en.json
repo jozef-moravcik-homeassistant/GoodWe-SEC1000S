@@ -1,0 +1,256 @@
+{
+  "config": {
+    "step": {
+      "connection": {
+        "title": "Connection to GoodWe SEC1000/S",
+        "description": "Setting up Home Assistant communication with GoodWe SEC1000/S",
+        "data": {
+          "device_name": "Unique Name (e.i. Serial Number)",
+          "include_device_name_in_entity": "Include device name in entity names",
+          "host": "IP address",
+          "scan_interval": "Communication (data refresh) interval in seconds"
+        }
+      },
+      "export_settings": {
+        "title": "Setting up export to the Grid - step 1",
+        "description": "Setting limits",
+        "data": {
+          "min_export_limit": "Minimum export limit (kW)",
+          "max_export_limit": "Maximum export limit (kW)",
+          "total_capacity": "Total capacity of your PV system (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Setting up export to the Grid - step 2",
+        "description": "Setting parameters for export to the grid",
+        "data": {
+          "export_limit_control_mode": "Export Limit Control Mode",
+          "scan_three_phases": "Sum measurement of all three phases"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the device, check the IP address.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "The device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "connection": {
+        "title": "Connection to GoodWe SEC1000/S",
+        "description": "Communication settings",
+        "data": {
+          "device_name": "Unique Name (e.i. Serial Number)",
+          "include_device_name_in_entity": "Include device name in entity names",
+          "host": "IP address",
+          "scan_interval": "Communication (data refresh) interval in seconds"
+        }
+      },
+      "export_settings": {
+        "title": "Setting up export to the Grid - step 1",
+        "description": "Setting limits",
+        "data": {
+          "min_export_limit": "Minimum export limit (kW)",
+          "max_export_limit": "Maximum export limit (kW)",
+          "total_capacity": "Total capacity of your PV system (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Setting up export to the Grid - step 2",
+        "description": "Setting the export mode",
+        "data": {
+          "export_limit_control_mode": "Export Limit Control Mode",
+          "scan_three_phases": "Sum measurement of all three phases"
+        }
+      }
+    }
+  },
+  "selector": {
+    "export_limit_control_mode": {
+      "options": {
+        "0": "Deactivated (Export without power limit)",
+        "3": "Controlled by entered export limit VALUE",
+        "1": "Controlled by DRED (only for Australia and New Zealand)",
+        "2": "Controlled by RCR (only for Germany)"
+      }
+    }
+  },
+  "services": {
+    "system_started": {
+      "name": "System started",
+      "description": "System started",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "set_export_limit": {
+      "name": "Set Export Limit",
+      "description": "Sets the export limit value for Goodwe SEC1000. The value will be automatically adjusted to stay within the configured minimum and maximum limits.",
+      "fields": {
+        "limit": {
+          "name": "Limit",
+          "description": "The export limit value in kW"
+        },
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "get_export_limit": {
+      "name": "Get export limit",
+      "description": "Reads the current export limit and control mode values from the Goodwe SEC1000 device and updates the integration settings.",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "export_enable": {
+      "name": "Export Enable",
+      "description": "This function sets the limit for Power Export to the Grid to the MAXIMUM export value defined in the integration settings.",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "export_disable": {
+      "name": "Export Disable",
+      "description": "This function sets the limit for Power Export to the Grid to the MINIMUM export value defined in the integration settings (default = 0).",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+	"export_toggle": {
+      "name": "Export Toggle",
+      "description": "This function toggles the export state. If export is currently enabled, it will be disabled (set to minimum export limit). If export is currently disabled, it will be enabled (set to maximum export limit).",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "set_datetime": {
+      "name": "Set Date and Time",
+      "description": "This function sets the Date and Time on the device.",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    },
+    "reset_export_watchdog": {
+      "name": "Reset Export Watchdog",
+      "description": "This function 'Reset' a Watchdog which controlls an export limit on the converters. Sometimes the watchdog is freezed so, this service switch off and switch on the export limit, which reset the watchdog on the inverters.",
+      "fields": {
+        "device": {
+          "name": "Device",
+          "description": "Device name (optional, required only when multiple devices are configured)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "v1": {
+        "name": "Voltage L1"
+      },
+      "v2": {
+        "name": "Voltage L1"
+      },
+      "v3": {
+        "name": "Voltage L3"
+      },
+      "i1": {
+        "name": "Current L1"
+      },
+      "i2": {
+        "name": "Current L2"
+      },
+      "i3": {
+        "name": "Current L3"
+      },
+      "p1": {
+        "name": "Power L1"
+      },
+      "p2": {
+        "name": "Power L2"
+      },
+      "p3": {
+        "name": "Power L3"
+      },
+      "meters_power": {
+        "name": "Meters Power"
+      },
+      "inverters_power": {
+        "name": "Inverters Power"
+      },
+      "load_power": {
+        "name": "Load Power"
+      },
+      "export_limit": {
+        "name": "Export Limit"
+      },
+      "export_state": {
+        "name": "Export State"
+      },
+      "modul_started": {
+        "name": "Modul started"
+      },
+      "export_disable_feedback": {
+        "name": "Export Disable - Feedback"
+      },
+      "export_enable_feedback": {
+        "name": "Export Enable - Feedback"
+      },
+      "get_export_limit_feedback": {
+        "name": "Get Export Limit - Feedback"
+      },
+      "set_export_limit_feedback": {
+        "name": "Set Export Limit - Feedback"
+      },
+      "set_datetime_feedback": {
+        "name": "Set Date and Time - Feedback"
+      },
+      "get_telemetry_data_feedback": {
+        "name": "Get Telemetry Data - Feedback"
+      },
+      "reset_export_watchdog_feedback": {
+        "name": "Reset Export Watchdog - Feedback"
+      }
+	},
+    "button": {
+      "reset_export_watchdog": {
+        "name": "Reset Export Watchdog"
+      },
+      "set_datetime": {
+        "name": "Set Date Time"
+      },
+      "export_enable": {
+        "name": "Enable Export"
+      },
+      "export_disable": {
+        "name": "Disable Export"
+      }
+    },
+    "switch": {
+      "export_to_grid": {
+        "name": "Export to Grid"
+      }
+    }
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "config": {
+    "step": {
+      "connection": {
+        "title": "Připojení k GoodWe SEC1000/S",
+        "description": "Nastavení komunikace Home Assistant s GoodWe SEC1000/S",
+        "data": {
+          "device_name": "Jedinečný název (např. Sériové číslo)",
+          "include_device_name_in_entity": "Zahrnout název zařízení do názvů entit",
+          "host": "IP adresa",
+          "scan_interval": "Interval komunikace (obnovy údajů) v sekundách"
+        }
+      },
+      "export_settings": {
+        "title": "Nastavení exportu do sítě - 1. krok",
+        "description": "Nastavení limitů",
+        "data": {
+          "min_export_limit": "Minimální limit exportu (kW)",
+          "max_export_limit": "Maximální limit exportu (kW)",
+          "total_capacity": "Celková kapacita Vašeho PV systému (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Nastavení exportu do sítě - 2. krok",
+        "description": "Nastavení parametrů exportu do sítě",
+        "data": {
+          "export_limit_control_mode": "Režim omezení exportu",
+          "scan_three_phases": "Zapnutí součtového měření všech tří fází"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nepodařilo se připojit k zařízení, zkontrolujte IP adresu.",
+      "unknown": "Neočekávaná chyba"
+    },
+    "abort": {
+      "already_configured": "Zařízení je již nakonfigurováno"
+    }
+  },
+  "options": {
+    "step": {
+      "connection": {
+        "title": "GoodWe SEC1000/S Nastavení",
+        "description": "Nastavení komunikace",
+        "data": {
+          "device_name": "Jedinečný název (např. Sériové číslo)",
+          "include_device_name_in_entity": "Zahrnout název zařízení do názvů entit",
+          "host": "IP adresa",
+          "scan_interval": "Interval komunikace (obnovy údajů) v sekundách"
+        }
+      },
+      "export_settings": {
+        "title": "Nastavení exportu do sítě - 1. krok",
+        "description": "Nastavení limitů",
+        "data": {
+          "min_export_limit": "Minimální limit exportu (kW)",
+          "max_export_limit": "Maximální limit exportu (kW)",
+          "total_capacity": "Celková kapacita Vašeho PV systému (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Nastavení exportu do sítě - 2. krok",
+        "description": "Nastavení režimu exportu",
+        "data": {
+          "export_limit_control_mode": "Režim omezení exportu",
+          "scan_three_phases": "Zapnutí součtového měření všech tří fází"
+        }
+      }
+    }
+  },
+  "selector": {
+    "export_limit_control_mode": {
+      "options": {
+        "0": "Deaktivovaný (Export bez omezení výkonu)",
+        "3": "Řízený zadanou hodnotou omezení exportu",
+        "1": "Řízený DRED (pouze pro Austrálii a Nový Zéland)",
+        "2": "Řízený RCR (pouze pro Německo)"
+      }
+    }
+  },
+  "services": {
+    "system_started": {
+      "name": "Systém spuštěn",
+      "description": "Systém spuštěn",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "set_export_limit": {
+      "name": "Nastavit limit exportu",
+      "description": "Nastavuje limitní hodnotu exportu pro Goodwe SEC1000. Hodnota se automaticky upraví tak, aby zůstala v rámci nakonfigurovaných minimálních a maximálních limitů.",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "Hodnota limitu exportu v kW"
+        }
+      }
+    },
+    "get_export_limit": {
+      "name": "Načíst limit exportu",
+      "description": "Načítá aktuální hodnotu limitu exportu a režimu řízení ze zařízení Goodwe SEC1000 a aktualizuje nastavení integrace.",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "export_enable": {
+      "name": "Povolit export",
+      "description": "Tato funkce nastaví limit pro export energie do sítě na MAXIMÁLNÍ hodnotu exportu definovanou v nastavení integrace.",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "export_disable": {
+      "name": "Zakázat export",
+      "description": "Tato funkce nastavuje limit pro export energie do sítě na MINIMÁLNÍ hodnotu exportu definovanou v nastavení integrace (výchozí = 0).",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "export_toggle": {
+      "name": "Přepínač Exportu",
+      "description": "Tato funkce přepíná stav exportu. Pokud je export momentálně povolen, bude zakázán (nastaven na minimální limit exportu). Pokud je export momentálně zakázán, bude povolen (nastaven na maximální limit exportu).",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "set_datetime": {
+      "name": "Nastavit datum a čas",
+      "description": "Tato funkce nastavuje datum a čas na zařízení.",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    },
+    "reset_export_watchdog": {
+      "name": "Reset Watchdog Exportu",
+      "description": "Tato funkce \"resetuje\" watchdog v zařízení, který řídí limit exportu na měničích. Někdy se watchdog zasekne, takže tato služba vypne a zapne limit exportu, čímž se resetuje watchdog exportu na měničích.",
+      "fields": {
+        "device": {
+          "name": "Zařízení",
+          "description": "Název zařízení (volitelné, povinné pouze při více nakonfigurovaných zařízeních)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "v1": {
+        "name": "Napětí L1"
+      },
+      "v2": {
+        "name": "Napětí L2"
+      },
+      "v3": {
+        "name": "Napětí L3"
+      },
+      "i1": {
+        "name": "Proud L1"
+      },
+      "i2": {
+        "name": "Proud L2"
+      },
+      "i3": {
+        "name": "Proud L3"
+      },
+      "p1": {
+        "name": "Výkon L1"
+      },
+      "p2": {
+        "name": "Výkon L2"
+      },
+      "p3": {
+        "name": "Výkon L3"
+      },
+      "meters_power": {
+        "name": "Výkon na elektroměru"
+      },
+      "inverters_power": {
+        "name": "Výkon na měničích"
+      },
+      "load_power": {
+        "name": "Příkon zátěže"
+      },
+      "export_limit": {
+        "name": "Limit exportu do sítě"
+      },
+      "export_state": {
+        "name": "Stav Exportu do sítě"
+      },
+      "modul_started": {
+        "name": "Modul spuštěn"
+      },
+      "export_disable_feedback": {
+        "name": "Export vypnutý - Feedback"
+      },
+      "export_enable_feedback": {
+        "name": "Export zapnutý - Feedback"
+      },
+      "get_export_limit_feedback": {
+        "name": "Limit exportu načtený - Feedback"
+      },
+      "set_export_limit_feedback": {
+        "name": "Limit Exportu nastavený - Feedback"
+      },
+      "set_datetime_feedback": {
+        "name": "Čas a datum nastavený - Feedback"
+      },
+      "get_telemetry_data_feedback": {
+        "name": "Telemetrická data načtená - Feedback"
+      },
+      "reset_export_watchdog_feedback": {
+        "name": "Watchdog exportu resetován - Feedback"
+      }
+    },
+    "button": {
+      "reset_export_watchdog": {
+        "name": "Reset Watchdog Exportu"
+      },
+      "set_datetime": {
+        "name": "Nastavit Datum a Čas"
+      },
+      "export_enable": {
+        "name": "Povolit Export"
+      },
+      "export_disable": {
+        "name": "Zakázat Export"
+      }
+    },
+    "switch": {
+      "export_to_grid": {
+        "name": "Export do sítě"
+      }
+    }
+  }
+}

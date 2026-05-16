@@ -1,0 +1,256 @@
+{
+  "config": {
+    "step": {
+      "connection": {
+        "title": "Połączenie z GoodWe SEC1000/S",
+        "description": "Konfiguracja komunikacji Home Assistant z GoodWe SEC1000/S",
+        "data": {
+          "device_name": "Unikalna nazwa (np. Numer seryjny)",
+          "include_device_name_in_entity": "Uwzględnij nazwę urządzenia w nazwach encji",
+          "host": "Adres IP",
+          "scan_interval": "Interwał komunikacji (odświeżania danych) w sekundach"
+        }
+      },
+      "export_settings": {
+        "title": "Ustawienia eksportu do sieci - krok 1",
+        "description": "Konfiguracja limitów",
+        "data": {
+          "min_export_limit": "Minimalny limit eksportu (kW)",
+          "max_export_limit": "Maksymalny limit eksportu (kW)",
+          "total_capacity": "Całkowita moc Twojego systemu PV (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Ustawienia eksportu do sieci - krok 2",
+        "description": "Konfiguracja parametrów eksportu do sieci",
+        "data": {
+          "export_limit_control_mode": "Tryb ograniczenia eksportu",
+          "scan_three_phases": "Włączenie sumarycznego pomiaru wszystkich trzech faz"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie udało się połączyć z urządzeniem, sprawdź adres IP.",
+      "unknown": "Nieoczekiwany błąd"
+    },
+    "abort": {
+      "already_configured": "Urządzenie jest już skonfigurowane"
+    }
+  },
+  "options": {
+    "step": {
+      "connection": {
+        "title": "GoodWe SEC1000/S Ustawienia",
+        "description": "Konfiguracja komunikacji",
+        "data": {
+          "device_name": "Unikalna nazwa (np. Numer seryjny)",
+          "include_device_name_in_entity": "Uwzględnij nazwę urządzenia w nazwach encji",
+          "host": "Adres IP",
+          "scan_interval": "Interwał komunikacji (odświeżania danych) w sekundach"
+        }
+      },
+      "export_settings": {
+        "title": "Ustawienia eksportu do sieci - krok 1",
+        "description": "Konfiguracja limitów",
+        "data": {
+          "min_export_limit": "Minimalny limit eksportu (kW)",
+          "max_export_limit": "Maksymalny limit eksportu (kW)",
+          "total_capacity": "Całkowita moc Twojego systemu PV (kWp)"
+        }
+      },
+      "control_settings": {
+        "title": "Ustawienia eksportu do sieci - krok 2",
+        "description": "Konfiguracja trybu eksportu",
+        "data": {
+          "export_limit_control_mode": "Tryb ograniczenia eksportu",
+          "scan_three_phases": "Włączenie sumarycznego pomiaru wszystkich trzech faz"
+        }
+      }
+    }
+  },
+  "selector": {
+    "export_limit_control_mode": {
+      "options": {
+        "0": "Wyłączony (Eksport bez ograniczenia mocy)",
+        "3": "Sterowany zadaną wartością ograniczenia eksportu",
+        "1": "Sterowany DRED (tylko dla Australii i Nowej Zelandii)",
+        "2": "Sterowany RCR (tylko dla Niemiec)"
+      }
+    }
+  },
+  "services": {
+    "system_started": {
+      "name": "System uruchomiony",
+      "description": "System uruchomiony",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "set_export_limit": {
+      "name": "Ustaw limit eksportu",
+      "description": "Ustawia wartość limitu eksportu dla Goodwe SEC1000. Wartość zostanie automatycznie dostosowana, aby pozostała w ramach skonfigurowanych limitów minimalnych i maksymalnych.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "Wartość limitu eksportu w kW"
+        }
+      }
+    },
+    "get_export_limit": {
+      "name": "Odczytaj limit eksportu",
+      "description": "Odczytuje aktualną wartość limitu eksportu i trybu sterowania z urządzenia Goodwe SEC1000 i aktualizuje ustawienia integracji.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "export_enable": {
+      "name": "Włącz eksport",
+      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MAKSYMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "export_disable": {
+      "name": "Wyłącz eksport",
+      "description": "Ta funkcja ustawia limit eksportu energii do sieci na MINIMALNĄ wartość eksportu zdefiniowaną w ustawieniach integracji (domyślnie = 0).",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "export_toggle": {
+      "name": "Przełącznik Eksportu",
+      "description": "Ta funkcja przełącza stan eksportu. Jeśli eksport jest obecnie włączony, zostanie wyłączony (ustawiony na minimalny limit eksportu). Jeśli eksport jest obecnie wyłączony, zostanie włączony (ustawiony na maksymalny limit eksportu).",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "set_datetime": {
+      "name": "Ustaw datę i czas",
+      "description": "Ta funkcja ustawia datę i czas na urządzeniu.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    },
+    "reset_export_watchdog": {
+      "name": "Reset Watchdog Eksportu",
+      "description": "Ta funkcja \"resetuje\" watchdog w urządzeniu, który kontroluje limit eksportu na falownikach. Czasami watchdog się zawiesza, więc ta usługa wyłącza i włącza limit eksportu, resetując watchdog eksportu na falownikach.",
+      "fields": {
+        "device": {
+          "name": "Urządzenie",
+          "description": "Nazwa urządzenia (opcjonalne, wymagane tylko gdy skonfigurowano wiele urządzeń)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "v1": {
+        "name": "Napięcie L1"
+      },
+      "v2": {
+        "name": "Napięcie L2"
+      },
+      "v3": {
+        "name": "Napięcie L3"
+      },
+      "i1": {
+        "name": "Prąd L1"
+      },
+      "i2": {
+        "name": "Prąd L2"
+      },
+      "i3": {
+        "name": "Prąd L3"
+      },
+      "p1": {
+        "name": "Moc L1"
+      },
+      "p2": {
+        "name": "Moc L2"
+      },
+      "p3": {
+        "name": "Moc L3"
+      },
+      "meters_power": {
+        "name": "Moc na liczniku"
+      },
+      "inverters_power": {
+        "name": "Moc na falownikach"
+      },
+      "load_power": {
+        "name": "Pobór mocy obciążenia"
+      },
+      "export_limit": {
+        "name": "Limit eksportu do sieci"
+      },
+      "export_state": {
+        "name": "Stan Eksportu do sieci"
+      },
+      "modul_started": {
+        "name": "Moduł uruchomiony"
+      },
+      "export_disable_feedback": {
+        "name": "Eksport wyłączony - Feedback"
+      },
+      "export_enable_feedback": {
+        "name": "Eksport włączony - Feedback"
+      },
+      "get_export_limit_feedback": {
+        "name": "Limit eksportu odczytany - Feedback"
+      },
+      "set_export_limit_feedback": {
+        "name": "Limit Eksportu ustawiony - Feedback"
+      },
+      "set_datetime_feedback": {
+        "name": "Czas i data ustawione - Feedback"
+      },
+      "get_telemetry_data_feedback": {
+        "name": "Dane telemetryczne odczytane - Feedback"
+      },
+      "reset_export_watchdog_feedback": {
+        "name": "Watchdog eksportu zresetowany - Feedback"
+      }
+    },
+    "button": {
+      "reset_export_watchdog": {
+        "name": "Reset Watchdog Eksportu"
+      },
+      "set_datetime": {
+        "name": "Ustaw Datę i Czas"
+      },
+      "export_enable": {
+        "name": "Włącz Eksport"
+      },
+      "export_disable": {
+        "name": "Wyłącz Eksport"
+      }
+    },
+    "switch": {
+      "export_to_grid": {
+        "name": "Eksport do sieci"
+      }
+    }
+  }
+}
