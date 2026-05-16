@@ -60,8 +60,6 @@ def _get_entry_id_for_device(hass: HomeAssistant, device: str = None) -> str:
         raise ValueError("No devices configured")
 
 # Konštanta pre názov úložiska
-STORAGE_VERSION = 1
-STORAGE_KEY = f"{DOMAIN}.state"
 
 # Globálna premenná pre úložisko
 _STORAGE = None
@@ -125,14 +123,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_SCAN_INTERVAL,
         entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     )
-    min_export_limit = entry.options.get(
-        CONF_MIN_EXPORT_LIMIT,
-        entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT)
-    )
-    max_export_limit = entry.options.get(
-        CONF_MAX_EXPORT_LIMIT,
-        entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT)
-    )
     total_capacity = entry.options.get(
         CONF_TOTAL_CAPACITY,
         entry.data.get(CONF_TOTAL_CAPACITY, DEFAULT_TOTAL_CAPACITY)
@@ -146,10 +136,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data.get(CONF_SCAN_THREE_PHASES, DEFAULT_SCAN_THREE_PHASES)
     )
 
-    # Načítanie uložených dát zo Store
+    # Načítanie uložených dát zo Store.
+    # min/max_export_limit: storage má prioritu (nastavené službami) > options > data > default
     stored_data = await _STORAGE.async_load() or {}
-#    export_state = stored_data.get("export_state", False)
     export_state = False
+    min_export_limit = stored_data.get(
+        "min_export_limit",
+        entry.options.get(CONF_MIN_EXPORT_LIMIT,
+            entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT))
+    )
+    max_export_limit = stored_data.get(
+        "max_export_limit",
+        entry.options.get(CONF_MAX_EXPORT_LIMIT,
+            entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT))
+    )
 
 # ******************************************************************************************
 # **** Uloženie všetkých nastavení do inštancie a do "core.config_entries"******************
@@ -167,6 +167,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     instance.settings.export_limit_control_mode = export_limit_control_mode
     instance.settings.scan_three_phases = scan_three_phases
     instance.settings.export_state = export_state
+    instance._device_lock = asyncio.Lock()
     
     _LOGGER.info(
         f"async_setup_entry: min_export_limit={min_export_limit}kW, "
@@ -423,14 +424,30 @@ async def async_call_get_export_limit_callback(hass, entry_id):
         _LOGGER.error(f"Error calling services in callback: {ex}")
 
 # Helper function to save export_state to Store
+async def _save_to_storage(hass: HomeAssistant, **kwargs) -> None:
+    """Uloží zadané kľúče do storage, ostatné existujúce kľúče zachová."""
+    try:
+        data = await _STORAGE.async_load() or {}
+        data.update(kwargs)
+        await _STORAGE.async_save(data)
+        _LOGGER.info(f"Saved to storage: {kwargs}")
+    except Exception as ex:
+        _LOGGER.error(f"Error saving to storage: {ex}")
+
+
 async def save_export_state(hass: HomeAssistant, export_state: bool):
     """Save export_state to persistent storage."""
-    try:
-        data = {"export_state": export_state}
-        await _STORAGE.async_save(data)
-        _LOGGER.info(f"Saved export_state to storage: {export_state}")
-    except Exception as ex:
-        _LOGGER.error(f"Error saving export_state to storage: {ex}")
+    await _save_to_storage(hass, export_state=export_state)
+
+
+async def save_min_export_limit(hass: HomeAssistant, value: float):
+    """Save min_export_limit to persistent storage."""
+    await _save_to_storage(hass, min_export_limit=value)
+
+
+async def save_max_export_limit(hass: HomeAssistant, value: float):
+    """Save max_export_limit to persistent storage."""
+    await _save_to_storage(hass, max_export_limit=value)
 
 # Registrácia služby pre nastavenie limitu exportu
 async def set_export_limit_service(call: ServiceCall) -> None:
@@ -474,15 +491,15 @@ async def set_export_limit_service(call: ServiceCall) -> None:
 
             await call.hass.async_add_executor_job(instance.reset_set_export_limit_feedback)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-            await call.hass.async_add_executor_job(instance.set_export_limit, limit_float)
-
-            # Aktualizácia export_state na základe nastaveného limitu
-            old_export_state = instance.settings.export_state
-            if (limit_float - instance.settings.min_export_limit) < 0.01:
-                instance.settings.export_state = False
-            else:
-                instance.settings.export_state = True
-                
+            async with instance._device_lock:
+                await call.hass.async_add_executor_job(instance.set_export_limit, limit_float)
+                # Aktualizácia export_state na základe nastaveného limitu — vo vnútri locku
+                old_export_state = instance.settings.export_state
+                if (limit_float - instance.settings.min_export_limit) < 0.01:
+                    instance.settings.export_state = False
+                else:
+                    instance.settings.export_state = True
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
             # Ak sa export_state zmenil, uložím ho do Store
             if old_export_state != instance.settings.export_state:
                 await save_export_state(call.hass, instance.settings.export_state)
@@ -577,8 +594,10 @@ async def export_enable_service(call: ServiceCall) -> None:
         if instance:
             await call.hass.async_add_executor_job(instance.reset_export_enable_feedback)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-            await call.hass.async_add_executor_job(instance.export_enable)
-            instance.settings.export_state = True
+            async with instance._device_lock:
+                await call.hass.async_add_executor_job(instance.export_enable)
+                instance.settings.export_state = True  # vo vnútri locku
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
             await save_export_state(call.hass, True)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
@@ -605,8 +624,10 @@ async def export_disable_service(call: ServiceCall) -> None:
         if instance:
             await call.hass.async_add_executor_job(instance.reset_export_disable_feedback)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-            await call.hass.async_add_executor_job(instance.export_disable)
-            instance.settings.export_state = False
+            async with instance._device_lock:
+                await call.hass.async_add_executor_job(instance.export_disable)
+                instance.settings.export_state = False  # vo vnútri locku
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
             await save_export_state(call.hass, False)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
@@ -641,8 +662,10 @@ async def export_toggle_service(call: ServiceCall) -> None:
             
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             
-            # Call toggle and save new state
-            await call.hass.async_add_executor_job(instance.export_toggle)
+            # Call toggle and save new state — export_toggle interne aktualizuje export_state
+            async with instance._device_lock:
+                await call.hass.async_add_executor_job(instance.export_toggle)
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
             await save_export_state(call.hass, instance.settings.export_state)
             
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
@@ -725,27 +748,22 @@ async def set_min_export_limit_service(call: ServiceCall) -> None:
 
         new_limit = float(call.data["limit"])
 
-        # Aktualizácia inštancie a hass.data PRED spustením update_listener —
-        # update_listener tak uvidí old_min == new_limit a nepošle hodnotu znovu do zariadenia
         instance.settings.min_export_limit = new_limit
         call.hass.data[DOMAIN][entry_id]["min_export_limit"] = new_limit
 
-        # Ak je export vypnutý, odošli novú hodnotu do zariadenia
-        if not instance.settings.export_state:
-            _LOGGER.info(f"set_min_export_limit: export OFF -> sending {new_limit}kW to device")
-            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+        # Ak je export vypnutý, odošli novú hodnotu do zariadenia.
+        # Kontrola export_state je vo vnútri locku — eliminuje race condition
+        # s export_enable/disable ktoré bežia súčasne.
+        async with instance._device_lock:
+            if not instance.settings.export_state:
+                _LOGGER.info(f"set_min_export_limit: export OFF -> sending {new_limit}kW to device")
+                await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
 
-        # Persistencia do entry.options (má prioritu pred entry.data pri čítaní nastavení)
-        # async_update_entry spustí update_listener, ten však neuvidí zmenu min_export_limit
-        config_entries = call.hass.config_entries.async_entries(DOMAIN)
-        entry = next((e for e in config_entries if e.entry_id == entry_id), None)
-        if entry:
-            new_options = dict(entry.options)
-            new_options[CONF_MIN_EXPORT_LIMIT] = new_limit
-            call.hass.config_entries.async_update_entry(entry, options=new_options)
-        else:
-            async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-            async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        # Persistencia priamo do _STORAGE — žiadny async_update_entry, žiadny platform reload
+        await save_min_export_limit(call.hass, new_limit)
+        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
 
     except ValueError as ex:
         _LOGGER.error("Error in set_min_export_limit_service: %s", ex)
@@ -770,27 +788,22 @@ async def set_max_export_limit_service(call: ServiceCall) -> None:
 
         new_limit = float(call.data["limit"])
 
-        # Aktualizácia inštancie a hass.data PRED spustením update_listener —
-        # update_listener tak uvidí old_max == new_limit a nepošle hodnotu znovu do zariadenia
         instance.settings.max_export_limit = new_limit
         call.hass.data[DOMAIN][entry_id]["max_export_limit"] = new_limit
 
-        # Ak je export zapnutý, odošli novú hodnotu do zariadenia
-        if instance.settings.export_state:
-            _LOGGER.info(f"set_max_export_limit: export ON -> sending {new_limit}kW to device")
-            await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+        # Ak je export zapnutý, odošli novú hodnotu do zariadenia.
+        # Kontrola export_state je vo vnútri locku — eliminuje race condition
+        # s export_enable/disable ktoré bežia súčasne.
+        async with instance._device_lock:
+            if instance.settings.export_state:
+                _LOGGER.info(f"set_max_export_limit: export ON -> sending {new_limit}kW to device")
+                await call.hass.async_add_executor_job(instance.set_export_limit, new_limit)
+                await asyncio.sleep(DEFAULT_DEVICE_COMMAND_DELAY_MS / 1000)
 
-        # Persistencia do entry.options (má prioritu pred entry.data pri čítaní nastavení)
-        # async_update_entry spustí update_listener, ten však neuvidí zmenu max_export_limit
-        config_entries = call.hass.config_entries.async_entries(DOMAIN)
-        entry = next((e for e in config_entries if e.entry_id == entry_id), None)
-        if entry:
-            new_options = dict(entry.options)
-            new_options[CONF_MAX_EXPORT_LIMIT] = new_limit
-            call.hass.config_entries.async_update_entry(entry, options=new_options)
-        else:
-            async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
-            async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
+        # Persistencia priamo do _STORAGE — žiadny async_update_entry, žiadny platform reload
+        await save_max_export_limit(call.hass, new_limit)
+        async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
+        async_dispatcher_send(call.hass, f"{DOMAIN}_settings_update_{entry_id}")
 
     except ValueError as ex:
         _LOGGER.error("Error in set_max_export_limit_service: %s", ex)
@@ -817,14 +830,6 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
         CONF_HOST,
         entry.data.get(CONF_HOST, DEFAULT_HOST)
     )
-    min_export_limit = entry.options.get(
-        CONF_MIN_EXPORT_LIMIT,
-        entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT)
-    )
-    max_export_limit = entry.options.get(
-        CONF_MAX_EXPORT_LIMIT,
-        entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT)
-    )
     total_capacity = entry.options.get(
         CONF_TOTAL_CAPACITY,
         entry.data.get(CONF_TOTAL_CAPACITY, DEFAULT_TOTAL_CAPACITY)
@@ -844,6 +849,29 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
     stored_data = await _STORAGE.async_load() or {}
     export_state = stored_data.get("export_state", False)
+
+    # Ak boli min/max_export_limit zmenené cez UI (Options Flow), prevezmeme hodnoty z options
+    # a uložíme ich do storage — storage je autoritatívny zdroj pre tieto hodnoty
+    options_min = entry.options.get(CONF_MIN_EXPORT_LIMIT, None)
+    options_max = entry.options.get(CONF_MAX_EXPORT_LIMIT, None)
+    if options_min is not None:
+        stored_data["min_export_limit"] = options_min
+    if options_max is not None:
+        stored_data["max_export_limit"] = options_max
+    if options_min is not None or options_max is not None:
+        await _save_to_storage(hass, **{k: v for k, v in stored_data.items()
+                                        if k in ("min_export_limit", "max_export_limit")})
+
+    min_export_limit = stored_data.get(
+        "min_export_limit",
+        entry.options.get(CONF_MIN_EXPORT_LIMIT,
+            entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT))
+    )
+    max_export_limit = stored_data.get(
+        "max_export_limit",
+        entry.options.get(CONF_MAX_EXPORT_LIMIT,
+            entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT))
+    )
 
     # Bezpečne skopírujeme inštanciu a všetky nastavenia pred vymazaním
     old_data = None

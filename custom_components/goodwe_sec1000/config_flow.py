@@ -23,6 +23,7 @@ from homeassistant.helpers.selector import (
     EntitySelectorConfig,
 )
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.storage import Store
 
 from .goodwe_sec1000 import Goodwe_SEC1000_Instance
 from .const import *
@@ -282,13 +283,19 @@ class GoodweSEC1000OptionsFlowHandler(config_entries.OptionsFlow):
             self._data.update(user_input)
             return await self.async_step_control_settings()
 
-        min_export_limit = self.config_entry.options.get(
-            CONF_MIN_EXPORT_LIMIT,
-            self._config_entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT)
+        # Čítaj min/max zo storage (kde ich ukladajú service set_min/max_export_limit),
+        # s fallback na options → data → default
+        _storage = Store(self.hass, STORAGE_VERSION, STORAGE_KEY)
+        _stored = await _storage.async_load() or {}
+        min_export_limit = _stored.get(
+            "min_export_limit",
+            self.config_entry.options.get(CONF_MIN_EXPORT_LIMIT,
+                self._config_entry.data.get(CONF_MIN_EXPORT_LIMIT, DEFAULT_MIN_EXPORT_LIMIT))
         )
-        max_export_limit = self.config_entry.options.get(
-            CONF_MAX_EXPORT_LIMIT,
-            self._config_entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT)
+        max_export_limit = _stored.get(
+            "max_export_limit",
+            self.config_entry.options.get(CONF_MAX_EXPORT_LIMIT,
+                self._config_entry.data.get(CONF_MAX_EXPORT_LIMIT, DEFAULT_MAX_EXPORT_LIMIT))
         )
         total_capacity = self.config_entry.options.get(
             CONF_TOTAL_CAPACITY,

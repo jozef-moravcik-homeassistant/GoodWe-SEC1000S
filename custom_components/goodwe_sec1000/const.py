@@ -8,7 +8,10 @@
 from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN, STATE_UNAVAILABLE, STATE_OK, STATE_PROBLEM
 
 DOMAIN = "goodwe_sec1000"
-VERSION = "1.01.01"
+
+STORAGE_VERSION = 1
+STORAGE_KEY = f"{DOMAIN}.state"
+VERSION = "1.01.04"
 MANUFACTURER = "Jozef Moravcik"
 MODEL = "GoodWe SEC1000/S"
 NAME = "GoodWe SEC1000/S"
@@ -104,6 +107,9 @@ DEFAULT_Retry_Waiting_Time = 5
 # constants for connection settings
 DEFAULT_SCAN_INTERVAL = 10
 DEFAULT_HOST = "192.168.1.200"
+
+# Bezpečnostná pauza medzi príkazmi odosielanými do zariadenia (v milisekundách)
+DEFAULT_DEVICE_COMMAND_DELAY_MS = 1000
 
 # constants for export settings
 DEFAULT_MIN_EXPORT_LIMIT = 0.0
