@@ -117,9 +117,9 @@ class GoodweSEC1000ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         export_schema = vol.Schema(
             {
                 vol.Optional(CONF_MIN_EXPORT_LIMIT, default=DEFAULT_MIN_EXPORT_LIMIT): 
-                    vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
+                    vol.All(vol.Coerce(float), vol.Range(min=-100.00, max=100.00)),
                 vol.Optional(CONF_MAX_EXPORT_LIMIT, default=DEFAULT_MAX_EXPORT_LIMIT): 
-                    vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
+                    vol.All(vol.Coerce(float), vol.Range(min=-100.00, max=100.00)),
                 vol.Optional(CONF_TOTAL_CAPACITY, default=DEFAULT_TOTAL_CAPACITY): 
                     vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
             }
@@ -306,9 +306,9 @@ class GoodweSEC1000OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional(CONF_MIN_EXPORT_LIMIT, default=min_export_limit):
-                        vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
+                        vol.All(vol.Coerce(float), vol.Range(min=-100.00, max=100.00)),
                     vol.Optional(CONF_MAX_EXPORT_LIMIT, default=max_export_limit):
-                        vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
+                        vol.All(vol.Coerce(float), vol.Range(min=-100.00, max=100.00)),
                     vol.Optional(CONF_TOTAL_CAPACITY, default=total_capacity):
                         vol.All(vol.Coerce(float), vol.Range(min=0.00, max=100.00)),
                 }

@@ -71,9 +71,9 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_HOST, default=DEFAULT_HOST): cv.string,
                 vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.positive_int,
                 vol.Optional(CONF_MIN_EXPORT_LIMIT, default=DEFAULT_MIN_EXPORT_LIMIT): 
-                    vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.All(vol.Coerce(float), vol.Range(min=-100.0, max=100.0)),
                 vol.Optional(CONF_MAX_EXPORT_LIMIT, default=DEFAULT_MAX_EXPORT_LIMIT): 
-                    vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.All(vol.Coerce(float), vol.Range(min=-100.0, max=100.0)),
                 vol.Optional(CONF_TOTAL_CAPACITY, default=DEFAULT_TOTAL_CAPACITY): 
                     vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
                 vol.Optional(CONF_EXPORT_LIMIT_CONTROL_MODE, default=DEFAULT_EXPORT_LIMIT_CONTROL_MODE): 
@@ -307,7 +307,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 SERVICE_SET_MIN_EXPORT_LIMIT,
                 set_min_export_limit_service,
                 schema=vol.Schema({
-                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=-100.0, max=100.0)),
                     vol.Optional("device"): cv.string,
                 })
             )
@@ -318,7 +318,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 SERVICE_SET_MAX_EXPORT_LIMIT,
                 set_max_export_limit_service,
                 schema=vol.Schema({
-                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=100.0)),
+                    vol.Required("limit"): vol.All(vol.Coerce(float), vol.Range(min=-100.0, max=100.0)),
                     vol.Optional("device"): cv.string,
                 })
             )

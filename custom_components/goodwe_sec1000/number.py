@@ -74,7 +74,7 @@ async def async_setup_entry(
             entity_id=ENTITY_NUMBER_export_limit,
             name="Export Limit",
             translations=translations,
-            min_value=0.0,
+            min_value=-100.0,
             max_value=100.0,
             step=0.1,
             icon="mdi:transmission-tower-export",
