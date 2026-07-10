@@ -85,7 +85,7 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.SWITCH]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.SWITCH, Platform.NUMBER]
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Goodwe SEC1000 component."""
