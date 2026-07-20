@@ -489,6 +489,9 @@ async def set_export_limit_service(call: ServiceCall) -> None:
                 _LOGGER.warning("Export limit adjusted from %s to maximum %s", limit_float, max_limit)
                 limit_float = max_limit
 
+            # Persist the user's desired value so the number entity stays in sync
+            instance.settings.export_limit_desired = limit_float
+
             await call.hass.async_add_executor_job(instance.reset_set_export_limit_feedback)
             async_dispatcher_send(call.hass, f"{DOMAIN}_feedback_update_{entry_id}")
             async with instance._device_lock:
