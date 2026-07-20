@@ -12,15 +12,15 @@ system_started:
 
 set_export_limit:
   name: Set export limit
-  description: Sets the export limit value for Goodwe SEC1000. The value will be automatically adjusted to stay within the configured minimum and maximum limits.
+  description: Sets the export limit value for Goodwe SEC1000. The value will be automatically adjusted to stay within the configured minimum and maximum limits. Negative values are allowed and instruct the device to permit grid import up to that magnitude.
   fields:
     limit:
       name: Limit
-      description: The export limit value in kW.
+      description: The export limit value in kW. Negative values allow grid import.
       required: true
       selector:
         number:
-          min: 0
+          min: -100
           max: 100
           step: 0.1
           unit_of_measurement: kW
@@ -106,15 +106,15 @@ reset_export_watchdog:
 
 set_min_export_limit:
   name: Set Minimum Export Limit
-  description: Sets the "Minimálny limit exportu" configuration parameter. If export is currently disabled, the new value is immediately sent to the device.
+  description: Sets the "Minimálny limit exportu" configuration parameter. If export is currently disabled, the new value is immediately sent to the device. Negative values are allowed.
   fields:
     limit:
       name: Limit
-      description: The minimum export limit value in kW.
+      description: The minimum export limit value in kW. Negative values allow grid import.
       required: true
       selector:
         number:
-          min: 0
+          min: -100
           max: 100
           step: 0.1
           unit_of_measurement: kW
@@ -128,15 +128,15 @@ set_min_export_limit:
 
 set_max_export_limit:
   name: Set Maximum Export Limit
-  description: Sets the "Maximálny limit exportu" configuration parameter. If export is currently enabled, the new value is immediately sent to the device.
+  description: Sets the "Maximálny limit exportu" configuration parameter. If export is currently enabled, the new value is immediately sent to the device. Negative values are allowed.
   fields:
     limit:
       name: Limit
-      description: The maximum export limit value in kW.
+      description: The maximum export limit value in kW. Negative values allow grid import.
       required: true
       selector:
         number:
-          min: 0
+          min: -100
           max: 100
           step: 0.1
           unit_of_measurement: kW

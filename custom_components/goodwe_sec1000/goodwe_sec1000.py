@@ -169,6 +169,8 @@ class Goodwe_SEC1000_Instance:
         scan_three_phases: bool = DEFAULT_SCAN_THREE_PHASES                     # Scan each phase value = x01 (False), Scan total of three phases value = x02 (True)
         ratio_ct: float = 0                                                     # Ratio of CR (measuring coils)
         export_limit: float = 0                                                 # Limit exportu do siete v kW
+        export_limit_desired: float = 0                                         # požadovaný limit nastavený používateľom (kW)
+        export_limit_desired_initialized: bool = False                         # či bol export_limit_desired inicializovaný zo zariadenia
         export_state: bool = False                                              # Status exportu (True=enabled, False=disabled)
         modul_started: bool = False
         device_initialized: bool = False                                        # Flag indicating if initial communication with device succeeded
@@ -389,6 +391,11 @@ class Goodwe_SEC1000_Instance:
                 self.settings.total_capacity = round(1e-3 * struct.unpack(">i", rx_data[0x06:0x0A])[0],1)
                 self.settings.ratio_ct = round(0 * struct.unpack(">i", rx_data[0x0A:0x0E])[0],1)
                 self.settings.export_limit = round(1e-3 * struct.unpack(">i", rx_data[0x0E:0x12])[0],1)
+
+                # Initialize desired value from device on first successful read
+                if not getattr(self.settings, 'export_limit_desired_initialized', False):
+                    self.settings.export_limit_desired = self.settings.export_limit
+                    self.settings.export_limit_desired_initialized = True
 
                 if (self.settings.export_limit - self.settings.min_export_limit) < 0.01:
                     self.settings.export_state = False

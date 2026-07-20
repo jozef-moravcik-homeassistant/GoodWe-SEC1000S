@@ -74,7 +74,7 @@ async def async_setup_entry(
             entity_id=ENTITY_NUMBER_export_limit,
             name="Export Limit",
             translations=translations,
-            min_value=0.0,
+            min_value=-100.0,
             max_value=100.0,
             step=0.1,
             icon="mdi:transmission-tower-export",
@@ -206,11 +206,14 @@ class NumberEntityDefinition(NumberEntity):
             await self.hass.services.async_call(
                 DOMAIN,
                 SERVICE_SET_EXPORT_LIMIT,
-                {"value": value},
+                {"limit": value},
                 blocking=True,
             )
             _LOGGER.info(f"Number {self.entity_id} set to {value}, calling service {SERVICE_SET_EXPORT_LIMIT}")
-            
+
+            # Persist desired value so the number doesn't reset on feedback updates
+            self._instance.settings.export_limit_desired = value
+
             # Update value immediately for responsiveness
             self._attr_native_value = value
             self.async_write_ha_state()
